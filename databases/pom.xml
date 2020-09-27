@@ -6,6 +6,15 @@
     <artifactId>java-miscellany</artifactId>
     <version>0.0.2-SNAPSHOT</version>
   </parent>
+
   <artifactId>databases</artifactId>
   <packaging>jar</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+        <version>42.2.14</version>
+    </dependency>
+  </dependencies>
 </project>
