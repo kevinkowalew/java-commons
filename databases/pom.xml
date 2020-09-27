@@ -16,5 +16,10 @@
       <artifactId>postgresql</artifactId>
         <version>42.2.14</version>
     </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
   </dependencies>
 </project>
