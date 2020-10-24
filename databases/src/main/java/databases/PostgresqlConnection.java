@@ -3,7 +3,6 @@ package databases;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Optional;
 
 public class PostgresqlConnection implements DatabaseConnection {
 	private final String url;
@@ -24,7 +23,7 @@ public class PostgresqlConnection implements DatabaseConnection {
 	public static class Builder {
 		private String host = "127.0.0.1";
 		private int port = 5432;
-		private String databaseName = "src/main/databases";
+		private String databaseName = "";
 		private String user = "";
 		private String password = "";
 
@@ -87,16 +86,6 @@ public class PostgresqlConnection implements DatabaseConnection {
 		} catch (SQLException throwables) {
 			System.out.println(throwables.getLocalizedMessage());
 			return false;
-		}
-	}
-
-	@Override
-	public Optional<String> executeQuery(String query) {
-		try {
-			return Optional.of(connection.nativeSQL(query));
-		} catch (SQLException throwables){
-			System.out.println(throwables.getLocalizedMessage());
-			return Optional.empty();
 		}
 	}
 }
