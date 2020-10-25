@@ -22,8 +22,4 @@ public class DatabaseController {
 	public boolean isOpen() {
 		return connection.isOpen();
 	}
-
-	public Optional<String> execute(String query) {
-	    return connection.executeQuery(query);
-	}
 }
