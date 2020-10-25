@@ -9,7 +9,6 @@
   <modules>
     <module>databases</module>
     <module>platform</module>
-    <module>testing</module>
   </modules>
 
   <properties>

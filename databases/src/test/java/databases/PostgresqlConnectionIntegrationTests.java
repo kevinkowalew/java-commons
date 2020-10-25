@@ -16,6 +16,7 @@ public class PostgresqlConnectionIntegrationTests {
                 .setUser("admin")
                 .setPassword("password")
                 .build();
+
         // Act
         Optional<DatabaseController> controller = DatabaseController.connect(connection);
 

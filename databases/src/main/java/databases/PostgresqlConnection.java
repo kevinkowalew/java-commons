@@ -3,6 +3,7 @@ package databases;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Optional;
 
 public class PostgresqlConnection implements DatabaseConnection {
 	private final String url;
