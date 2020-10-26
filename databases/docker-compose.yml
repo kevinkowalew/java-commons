@@ -5,9 +5,9 @@ services:
     ports:
       - 5432:5432
     environment:
-      - POSTGRES_DB=database
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=rainbow_database
+      - POSTGRES_USER=unicorn_user
+      - POSTGRES_PASSWORD=magical_password
     volumes:
       - database-data:/var/lib/postgresql/data/ # persist data locally
 volumes:

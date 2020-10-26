@@ -1,25 +1,15 @@
 package databases;
 
-import java.util.Optional;
+public class DatabaseController<Connection extends DatabaseConnection> {
+	public Connection connection;
 
-public class DatabaseController {
-	final private DatabaseConnection connection;
-
-	private DatabaseController(DatabaseConnection connection) {
+	public DatabaseController(Connection connection) {
 		this.connection = connection;
 	}
 
-	public static Optional<DatabaseController> connect(DatabaseConnection connection) {
-		try {
-			DatabaseController controller = new DatabaseController(connection);
-			connection.connect();
-			return connection.isOpen() ? Optional.of(controller) : Optional.empty();
-		} catch (Exception e) {
-			return Optional.empty();
-		}
+	public boolean isOpen() {
+		return this.connection.isOpen();
 	}
 
-	public boolean isOpen() {
-		return connection.isOpen();
-	}
+	public boolean connect() { return this.connection.connect(); }
 }

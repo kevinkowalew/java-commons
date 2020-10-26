@@ -4,82 +4,40 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class PostgresqlConnection implements DatabaseConnection {
+class PostgresqlConnection implements DatabaseConnection {
 	private final String url;
 	private final String user;
 	private final String password;
-	private Connection connection = null;
+	Connection connection = null;
 
-	private PostgresqlConnection(Builder builder) {
-		this.url = constructUrl(builder);
-		this.user = builder.user;
-		this.password = builder.password;
+	PostgresqlConnection(PostgresqlConnectionConfiguration configuration) {
+		this.url = constructUrl(configuration);
+		this.user = configuration.getUser();
+		this.password = configuration.getPassword();
 	}
 
-	public static Builder newBuilder() {
-		return new Builder();
-	}
-
-	public static class Builder {
-		private String host = "127.0.0.1";
-		private int port = 5432;
-		private String databaseName = "";
-		private String user = "";
-		private String password = "";
-
-		private Builder() {
-		}
-
-		public Builder setHost(String host) {
-			this.host = host;
-			return this;
-		}
-
-		public Builder setPort(int port) {
-			this.port = port;
-			return this;
-		}
-
-		public Builder setDatabaseName(String databaseName) {
-			this.databaseName = databaseName;
-			return this;
-		}
-
-		public Builder setUser(String user) {
-			this.user = user;
-			return this;
-		}
-
-		public Builder setPassword(String password) {
-			this.password = password;
-			return this;
-		}
-
-		public PostgresqlConnection build() {
-			return new PostgresqlConnection(this);
-		}
-
-	}
-
-	private String constructUrl(Builder builder) {
-		return "jdbc:postgresql://" + builder.host + ":" + builder.port + "/" + builder.databaseName;
+	private String constructUrl(PostgresqlConnectionConfiguration configuration) {
+		return "jdbc:postgresql://" +
+				configuration.getHost()+ ":" +
+				configuration.getPort() + "/" +
+				configuration.getDatabaseName();
 	}
 
 	@Override
-	public void connect() {
+	public boolean connect() {
 		try {
 			Class.forName("org.postgresql.Driver");
 			connection = DriverManager.getConnection(url, user, password);
+			return isOpen();
 		} catch (SQLException | ClassNotFoundException e) {
 			System.out.println(e.getLocalizedMessage());
+			return false;
 		}
 	}
 
 	@Override
 	public boolean isOpen() {
-		if (connection == null) {
-			return false;
-		}
+		if (connection == null) { return false; }
 
 		try {
 			return connection.isValid(10);

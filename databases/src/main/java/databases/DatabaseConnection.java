@@ -1,7 +1,6 @@
 package databases;
 
 public interface DatabaseConnection {
-	void connect();
-
+	boolean connect();
 	boolean isOpen();
 }
