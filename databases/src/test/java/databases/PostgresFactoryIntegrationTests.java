@@ -32,8 +32,4 @@ public class PostgresFactoryIntegrationTests {
       Assert.assertTrue(controller.get().connect());
       Assert.assertTrue(controller.get().isOpen());
    }
-
-   void test() {
-
-   }
 }
