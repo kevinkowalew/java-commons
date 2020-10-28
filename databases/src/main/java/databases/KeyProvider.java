@@ -1,5 +1,5 @@
 package databases;
 
-interface KeyProvider<KeyType> {
+public interface KeyProvider<KeyType> {
     KeyType getKey();
 }
