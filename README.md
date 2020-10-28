@@ -24,6 +24,5 @@
 ## Bumping a Release
 - To push a new release to Github use the following:
 ```shell script
-$ mvn release:prepare
-$ mvn release:perform
+$ mvn release:prepare -Dresume=false    
 ```
