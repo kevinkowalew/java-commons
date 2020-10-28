@@ -38,7 +38,7 @@ public class GenericDaoTests {
         mockUsers.forEach(sut::create);
 
         // Assert
-        mockUsers.forEach(this::assertNonemptyUserOptional);
+        mockUsers.forEach(this::assertExistentUser);
     }
 
 
@@ -60,7 +60,7 @@ public class GenericDaoTests {
                 .forEach(this::assertUpdatedMockUserName);
         mockUsers.stream()
                 .filter(u -> !mockUsersSubset.contains(u))
-                .forEach(this::assertNonemptyUserOptional);
+                .forEach(this::assertExistentUser);
     }
 
 
@@ -76,10 +76,10 @@ public class GenericDaoTests {
                 .forEach(sut::delete);
 
         // Assert
-        mockUsersSubset.forEach(this::assertEmptyUserOptional);
+        mockUsersSubset.forEach(this::assertNonexistentUser);
         mockUsers.stream()
                 .filter(u -> !mockUsersSubset.contains(u))
-                .forEach(this::assertNonemptyUserOptional);
+                .forEach(this::assertExistentUser);
     }
 
     private static List<MockUser>createMockUsers() {
@@ -89,12 +89,12 @@ public class GenericDaoTests {
                 .collect(Collectors.toList());
     }
 
-    private void assertNonemptyUserOptional(MockUser user) {
+    private void assertExistentUser(MockUser user) {
         Optional<MockUser> fetchedUser = sut.read(user.getKey());
         assertTrue(fetchedUser.isPresent());
     }
 
-    private void assertEmptyUserOptional(MockUser user) {
+    private void assertNonexistentUser(MockUser user) {
         Optional<MockUser> fetchedUser = sut.read(user.getKey());
         assertFalse(fetchedUser.isPresent());
     }

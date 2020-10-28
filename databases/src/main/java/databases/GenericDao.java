@@ -7,7 +7,7 @@ import java.util.Set;
 public class GenericDao<KeyType,ObjectType extends KeyProvider<KeyType>> implements Dao<KeyType, ObjectType> {
     private final Set<ObjectType> objects;
 
-    GenericDao() {
+    public GenericDao() {
         this.objects = new HashSet<>();
     }
 
