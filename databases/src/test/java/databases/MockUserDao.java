@@ -1,4 +1,4 @@
 package databases;
 
-public class MockUserDao extends GenericDao<String, User> {
+public class MockUserDao extends GenericDao<String, MockUser> {
 }
