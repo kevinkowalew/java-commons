@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.development.kowalewski</groupId>
     <artifactId>java-miscellany</artifactId>
-    <version>0.0.10-SNAPSHOT</version>
+    <version>0.0.10</version>
   </parent>
 
   <artifactId>databases</artifactId>
