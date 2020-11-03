@@ -1,8 +1,6 @@
 package databases;
 
-import org.junit.Assert;
 import org.junit.Test;
-import org.junit.internal.runners.statements.Fail;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,8 +45,10 @@ public class PostgresqlControllerIntegrationTests {
         assertTrue(createTableResult);
         assertTrue(insertUserResult);
         assertTrue(dropTableResult);
+
         assertTrue(users.isPresent());
         assertEquals(users.stream().count(), 1);
+
         MockUser user = users.get().stream().findFirst().get();
         assertEquals(user.getId(), 0);
         assertEquals(user.getName(), "Kevin");
