@@ -1,7 +1,7 @@
 package databases;
 
-public interface DatabaseConnection {
-	void connect();
+import java.util.Optional;
 
-	boolean isOpen();
+public interface DatabaseConnection<T> {
+	Optional<T> connect();
 }
