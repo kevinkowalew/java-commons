@@ -4,7 +4,7 @@
   <groupId>com.development.kowalewski</groupId>
   <artifactId>java-miscellany</artifactId>
   <packaging>pom</packaging>
-  <version>0.0.5-SNAPSHOT</version>
+  <version>0.0.10-SNAPSHOT</version>
 
   <modules>
     <module>databases</module>
@@ -69,7 +69,7 @@
           <artifactId>maven-release-plugin</artifactId>
           <version>2.5.3</version>
           <configuration>
-            <tag>0.0.9</tag>
+            <tag>0.0.10</tag>
             <autoVersionSubmodules>true</autoVersionSubmodules>
             <localCheckout>true</localCheckout>
           </configuration>

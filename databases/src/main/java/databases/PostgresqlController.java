@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-class PostgresqlController implements SQLExecutor {
+public class PostgresqlController implements SQLExecutor {
     PostgresqlConnection connection;
 
     public PostgresqlController(PostgresqlConnection connection) {
