@@ -2,6 +2,6 @@ package databases;
 
 import java.sql.ResultSet;
 
-interface ResultSetDeserializer<T> {
+public interface ResultSetDeserializer<T> {
     T deserialize(ResultSet resultSet);
 }
