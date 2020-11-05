@@ -4,12 +4,12 @@ import java.sql.*;
 import java.util.Optional;
 
 public class PostgresqlConnection implements DatabaseConnection<Connection> {
-	private final String url;
-	private final String user;
-	private final String password;
+	private String url;
+	private String user;
+	private String password;
 	private Connection connection = null;
 
-	private PostgresqlConnection(Builder builder) {
+	protected PostgresqlConnection(Builder builder) {
 		this.url = constructUrl(builder);
 		this.user = builder.user;
 		this.password = builder.password;
@@ -63,6 +63,19 @@ public class PostgresqlConnection implements DatabaseConnection<Connection> {
 	private String constructUrl(Builder builder) {
 		return "jdbc:postgresql://" + builder.host + ":" + builder.port + "/" + builder.databaseName;
 	}
+
+	protected void setUrl(String url) {
+		this.url = url;
+	}
+
+	protected void setUser(String user) {
+		this.user = user;
+	}
+
+	protected void setPassword(String password) {
+		this.password = password;
+	}
+
 
 	@Override
 	public Optional<Connection> connect() {
