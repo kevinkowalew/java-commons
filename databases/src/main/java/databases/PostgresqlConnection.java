@@ -9,7 +9,7 @@ public class PostgresqlConnection implements DatabaseConnection<Connection> {
 	private final String password;
 	private Connection connection = null;
 
-	protected PostgresqlConnection(Builder builder) {
+	private PostgresqlConnection(Builder builder) {
 		this.url = constructUrl(builder);
 		this.user = builder.user;
 		this.password = builder.password;
@@ -26,7 +26,7 @@ public class PostgresqlConnection implements DatabaseConnection<Connection> {
 		private String user = "";
 		private String password = "";
 
-		private Builder() {
+		protected Builder() {
 		}
 
 		public Builder setHost(String host) {
