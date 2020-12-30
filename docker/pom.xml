@@ -31,7 +31,7 @@
         <dependency>
             <groupId>com.development.kowalewski</groupId>
             <artifactId>testing</artifactId>
-            <version>0.0.16-SNAPSHOT</version>
+            <version>0.0.17-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

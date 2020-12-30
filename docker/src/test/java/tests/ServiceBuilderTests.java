@@ -5,8 +5,6 @@ import docker.fields.enums.Restart;
 import org.junit.Test;
 import testing.Testing;
 
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 
 public class ServiceBuilderTests {
