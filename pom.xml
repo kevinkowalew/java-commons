@@ -9,6 +9,8 @@
   <modules>
     <module>databases</module>
     <module>platform</module>
+    <module>docker</module>
+    <module>testing</module>
   </modules>
 
   <properties>

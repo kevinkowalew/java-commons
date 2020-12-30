@@ -1,0 +1,29 @@
+version: "3"
+services:
+  server:
+    image: dropwizard:latest
+    restart: always
+    ports:
+      - 5432:5432
+      - 2345:2345
+    environment:
+      - key=1
+      - yek=2
+    volumes:
+      - database-data:/var/lib/postgresql/data/
+      - pgadmin-data:/var/lib/pgadmin/data/
+  database:
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+      - 2345:2345
+    environment:
+      - key=1
+      - yek=2
+    volumes:
+      - database-data:/var/lib/postgresql/data/
+      - pgadmin-data:/var/lib/pgadmin/data/
+volumes:
+  database-data:
+  pgadmin-data:
