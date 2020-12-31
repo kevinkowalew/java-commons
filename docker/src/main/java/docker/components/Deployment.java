@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class Deployment {
-    private String version;
-    private List<Service> services;
-    private List<NamedVolume> namedVolumes;
+    private final String version;
+    private final List<Service> services;
+    private final List<NamedVolume> namedVolumes;
 
     public Deployment(Builder builder) {
         this.version = builder.version;
