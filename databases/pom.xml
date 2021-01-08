@@ -27,5 +27,16 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.development.kowalewski</groupId>
+      <artifactId>commons</artifactId>
+      <version>0.0.22-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.development.kowalewski</groupId>
+      <artifactId>docker</artifactId>
+      <version>0.0.22-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 </project>
+

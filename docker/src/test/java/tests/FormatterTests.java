@@ -4,7 +4,6 @@ import docker.Formatter;
 import docker.components.Deployment;
 import docker.components.Service;
 import org.junit.Test;
-import testing.Testing;
 
 import java.io.IOException;
 

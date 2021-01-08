@@ -1,4 +1,4 @@
-package testing;
+package tests;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,7 +15,7 @@ public class Testing {
         try {
             Path resourceDirectory = Paths.get("src", "test", "resources");
             String absolutePath = resourceDirectory.toFile().getAbsolutePath();
-            return Files.readString(Path.of(absolutePath + "\\" + resourceName));
+            return Files.readString(Path.of(absolutePath + "/" + resourceName));
         } catch (IOException e) {
             e.printStackTrace();
             return "";

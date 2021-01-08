@@ -15,11 +15,5 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.development.kowalewski</groupId>
-            <artifactId>testing</artifactId>
-            <version>0.0.22-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 </project>

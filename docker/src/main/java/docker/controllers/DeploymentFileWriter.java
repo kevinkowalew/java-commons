@@ -20,13 +20,6 @@ public class DeploymentFileWriter {
     public boolean writeToPath(String outputPath) throws IOException {
         String formattedDeployment = Formatter.createDescriptionForDeployment(deployment);
         Path file = Paths.get(outputPath);
-
-        boolean isRegularFile = Files.isRegularFile(file);
-        boolean isHidden = Files.isReadable(file);
-        boolean isReadable = Files.isReadable(file);
-        boolean isExecutable = Files.isExecutable(file);
-        boolean isSymbolicLink = Files.isSymbolicLink(file);
-
         Files.write(file, Collections.singleton(formattedDeployment));
         return new File(outputPath).exists();
     }

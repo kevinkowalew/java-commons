@@ -7,7 +7,6 @@ import docker.fields.NamedVolume;
 import docker.fields.Port;
 import docker.fields.Volume;
 import docker.fields.enums.Restart;
-import testing.Testing;
 
 public class MockFactory {
     /**

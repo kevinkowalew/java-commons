@@ -1,0 +1,11 @@
+---
+postgresqlConfiguration:
+  host: "localhost"
+  port: 5432
+  user: "admin"
+  password: "password"
+  databaseName: "database"
+pgAdminConfiguration:
+  email: "admin@gmail.com"
+  password: "secret"
+  port: 80

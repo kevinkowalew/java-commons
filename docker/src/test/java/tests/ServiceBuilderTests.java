@@ -3,7 +3,6 @@ package tests;
 import docker.components.Service;
 import docker.fields.enums.Restart;
 import org.junit.Test;
-import testing.Testing;
 
 import static org.junit.Assert.assertEquals;
 

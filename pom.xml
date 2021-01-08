@@ -7,16 +7,22 @@
   <version>0.0.22-SNAPSHOT</version>
 
   <modules>
+    <module>commons</module>
     <module>databases</module>
-    <module>platform</module>
     <module>docker</module>
-    <module>testing</module>
+    <module>platform</module>
   </modules>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
+    <guice.version>4.2.2</guice.version>
+    <dropwizard.version>2.0.0</dropwizard.version>
+    <snakeyaml.version>1.21</snakeyaml.version>
+    <dropwizard-swagger.version>0.7.0</dropwizard-swagger.version>
+    <jackson.version>2.11.1</jackson.version>
+    <postgresql.version>42.2.14</postgresql.version>
     <junit.version>4.12</junit.version>
     <maven-compiler-plugin-version>2.3.2</maven-compiler-plugin-version>
   </properties>
@@ -33,12 +39,12 @@
       <!-- Child modules-->
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>databases</artifactId>
+        <artifactId>commons</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>platform</artifactId>
+        <artifactId>databases</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -48,16 +54,45 @@
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>testing</artifactId>
+        <artifactId>platform</artifactId>
         <version>${project.version}</version>
       </dependency>
-
       <!-- External dependencies -->
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>${junit.version}</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.inject</groupId>
+        <artifactId>guice</artifactId>
+        <version>${guice.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-yaml</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>${snakeyaml.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.dropwizard</groupId>
+        <artifactId>dropwizard-core</artifactId>
+        <version>${dropwizard.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.federecio</groupId>
+        <artifactId>dropwizard-swagger</artifactId>
+        <version>${dropwizard-swagger.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.inject</groupId>
+        <artifactId>guice</artifactId>
+        <version>${guice.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

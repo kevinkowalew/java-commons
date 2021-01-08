@@ -1,6 +1,5 @@
-package databases;
+package databases.postgresql;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -8,17 +7,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class PostgresqlController implements SQLExecutor {
+public class PostgresqlExecutor implements databases.core.Executor {
     PostgresqlConnection connection;
 
-    public PostgresqlController(PostgresqlConnection connection) {
+    public PostgresqlExecutor(PostgresqlConnection connection) {
         this.connection = connection;
     }
 
     @Override
     public boolean executeUpdate(String update) {
         try {
-            Connection connection = connect();
+            java.sql.Connection connection = connect();
             Statement statement = connection.createStatement();
             statement.execute(update);
             commitAndClose(connection, statement);
@@ -29,9 +28,9 @@ public class PostgresqlController implements SQLExecutor {
     }
 
     @Override
-    public <T> Optional<List<T>> execute(String query, ResultSetDeserializer<T> deserializer) {
+    public <T> Optional<List<T>> execute(String query, PostgresqlDeserializer<T> deserializer) {
         try {
-            Connection connection = connect();
+            java.sql.Connection connection = connect();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
             List<T> returnValue = parseResults(resultSet, deserializer);
@@ -42,13 +41,13 @@ public class PostgresqlController implements SQLExecutor {
         }
     }
 
-    private Connection connect() throws Exception {
-        Connection connection = this.connection.connect().orElseThrow(Exception::new);
+    private java.sql.Connection connect() throws Exception {
+        java.sql.Connection connection = this.connection.connect().orElseThrow(Exception::new);
         connection.setAutoCommit(false);
         return connection;
     }
 
-    private <T> List<T> parseResults(ResultSet resultSet, ResultSetDeserializer<T> deserializer) throws SQLException {
+    private <T> List<T> parseResults(ResultSet resultSet, PostgresqlDeserializer<T> deserializer) throws SQLException {
         List<T> returnValue = new ArrayList<>();
 
         while(resultSet.next()) {
@@ -59,7 +58,7 @@ public class PostgresqlController implements SQLExecutor {
         return returnValue;
     }
 
-    private void commitAndClose(Connection connection, Statement statement) throws SQLException {
+    private void commitAndClose(java.sql.Connection connection, Statement statement) throws SQLException {
         connection.commit();
         statement.close();
         connection.close();

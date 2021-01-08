@@ -1,13 +1,16 @@
-package databases;
+package databases.postgresql;
 
-import java.sql.*;
+import databases.DatabaseConnection;
+
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Optional;
 
-public class PostgresqlConnection implements DatabaseConnection<Connection> {
+public class PostgresqlConnection implements DatabaseConnection<java.sql.Connection> {
 	private String url;
 	private String user;
 	private String password;
-	private Connection connection = null;
+	private java.sql.Connection connection = null;
 
 	protected PostgresqlConnection(Builder builder) {
 		this.url = constructUrl(builder);
@@ -78,10 +81,10 @@ public class PostgresqlConnection implements DatabaseConnection<Connection> {
 
 
 	@Override
-	public Optional<Connection> connect() {
+	public Optional<java.sql.Connection> connect() {
 		try {
 			Class.forName("org.postgresql.Driver");
-			Connection connection = DriverManager.getConnection(url, user, password);
+			java.sql.Connection connection = DriverManager.getConnection(url, user, password);
 			return Optional.of(connection);
 		} catch (SQLException | ClassNotFoundException e) {
 			return Optional.empty();

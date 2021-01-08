@@ -14,11 +14,13 @@ import java.io.IOException;
 
 public class DeploymentController {
     private final DeploymentFileWriter writer;
-    private final String outputPath;
+    private final String workingDirectory;
+    private final String filename;
 
-    public DeploymentController(DeploymentFileWriter writer, String outputPath) {
+    public DeploymentController(DeploymentFileWriter writer, String workingDirectory, String filename) {
         this.writer = writer;
-        this.outputPath = outputPath;
+        this.workingDirectory = workingDirectory;
+        this.filename = filename;
     }
 
     public boolean deploy() {
@@ -27,7 +29,7 @@ public class DeploymentController {
 
     private boolean writeFileToPath() {
         try {
-            return writer.writeToPath(outputPath);
+            return writer.writeToPath(workingDirectory + "/" + filename);
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -38,15 +40,14 @@ public class DeploymentController {
         return execute("docker-compose up");
     }
 
-    public boolean down() {
-        return execute("docker-compose down && docker volume rm $(docker volume ls -q)");
+    public boolean stopDeployment() {
+        return execute("docker stop $( docker ps ) && docker system prune –af ––volumes");
     }
 
     private boolean execute(String command) {
-        File workingDirectory = new File("");
-        ProcessBuilder pb = new ProcessBuilder(command);
+        ProcessBuilder pb = new ProcessBuilder(command.split(" "));
         pb.inheritIO();
-        pb.directory(workingDirectory);
+        pb.directory(new File(workingDirectory));
 
         try {
             pb.start();
