@@ -1,7 +1,8 @@
-package databases.postgresql;
+package test.unit.configuration;
 
 import com.google.common.io.Resources;
 import commons.utils.YamlDeserializer;
+import databases.postgresql.PostgresqlConfiguration;
 import org.junit.Test;
 
 import java.io.File;

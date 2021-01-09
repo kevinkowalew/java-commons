@@ -1,13 +1,18 @@
-package databases.postgresql;
+package test.integration.deployments;
 
+import commons.utils.BashExecutor;
 import commons.utils.YamlDeserializer;
 import databases.Factory;
+import databases.postgresql.PostgresqlConfiguration;
+import databases.postgresql.PostgresqlConnection;
+import databases.postgresql.PostgresqlExecutor;
 import docker.components.Deployment;
 import docker.controllers.DeploymentController;
 import docker.controllers.DeploymentFileWriter;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import test.MockUser;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,12 +35,13 @@ public class PostgresqlDeploymentIntegrationTests {
         final Deployment deployment = Factory.createDeploymentFromConfiguration(configuration.get());
         final DeploymentFileWriter writer = new DeploymentFileWriter(deployment);
         final String workingDirectory = "src/test/resources";
-        controller = new DeploymentController(writer, workingDirectory, "docker-compose.yml");
-        controller.deploy();
-        Thread.sleep(10000);
+        final BashExecutor bashExecutor = new BashExecutor();
+        controller = new DeploymentController(writer, workingDirectory, "docker-compose.yml", bashExecutor);
+        controller.start();
     }
 
     @AfterClass public static void cleanup() {
+        controller.stop();
     }
 
     @Test

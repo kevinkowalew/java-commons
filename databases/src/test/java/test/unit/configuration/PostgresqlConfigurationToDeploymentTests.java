@@ -1,9 +1,11 @@
-package databases.postgresql;
+package test.unit.configuration;
 
 import commons.utils.YamlDeserializer;
 import databases.DockerImage;
 import databases.DockerServiceName;
 import databases.adapters.PostgresqlConfigurationToDeployment;
+import databases.postgresql.PostgresqlConfiguration;
+import databases.postgresql.PostgresqlEnvironmentVariable;
 import docker.components.Deployment;
 import docker.components.Service;
 import docker.fields.EnvironmentVariable;
@@ -46,7 +48,7 @@ public class PostgresqlConfigurationToDeploymentTests {
     }
 
     private Service expectedPostgresService() {
-        final EnvironmentVariable username = new EnvironmentVariable(PostgresqlEnvironmentVariable.POSTGRES_USER, "username");
+        final EnvironmentVariable username = new EnvironmentVariable(PostgresqlEnvironmentVariable.POSTGRES_USER, "admin");
         final EnvironmentVariable password = new EnvironmentVariable(PostgresqlEnvironmentVariable.POSTGRES_PASSWORD, "password");
         final EnvironmentVariable port = new EnvironmentVariable(PostgresqlEnvironmentVariable.POSTGRES_PORT, 5432);
 
@@ -65,7 +67,7 @@ public class PostgresqlConfigurationToDeploymentTests {
 
     private Service expectedPgAdminService() {
         final EnvironmentVariable email = new EnvironmentVariable(PostgresqlEnvironmentVariable.PGADMIN_DEFAULT_EMAIL, "admin@gmail.com");
-        final EnvironmentVariable password = new EnvironmentVariable(PostgresqlEnvironmentVariable.PGADMIN_DEFAULT_PASSWORD, "password");
+        final EnvironmentVariable password = new EnvironmentVariable(PostgresqlEnvironmentVariable.PGADMIN_DEFAULT_PASSWORD, "secret");
         final EnvironmentVariable port = new EnvironmentVariable(PostgresqlEnvironmentVariable.PGADMIN_LISTEN_PORT, 80);
 
         final Volume pgadminData = new Volume("pgadmin-data", "/var/lib/pgadmin");

@@ -15,5 +15,9 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.development.kowalewski</groupId>
+            <artifactId>commons</artifactId>
+        </dependency>
     </dependencies>
 </project>

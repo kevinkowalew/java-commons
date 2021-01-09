@@ -1,4 +1,6 @@
-package databases.postgresql;
+package test;
+
+import databases.postgresql.PostgresqlDeserializer;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,7 +31,7 @@ public class MockUser {
     }
 
 
-    static class Deserializer implements PostgresqlDeserializer<MockUser> {
+    public static class Deserializer implements PostgresqlDeserializer<MockUser> {
         @Override
         public MockUser deserialize(ResultSet resultSet) {
             try {
