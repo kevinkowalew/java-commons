@@ -2,7 +2,7 @@ package test.unit.configuration;
 
 import com.google.common.io.Resources;
 import commons.utils.YamlDeserializer;
-import databases.postgresql.PostgresqlConfiguration;
+import databases.postgresql.PostgresqlDeploymentConfiguration;
 import org.junit.Test;
 
 import java.io.File;
@@ -18,7 +18,7 @@ public class PostgresqlDeploymentConfigurationTests {
         File file = null;
 
         // Act
-        Optional<PostgresqlConfiguration> configuration = YamlDeserializer.deserializeFromFile(file, PostgresqlConfiguration.class);
+        Optional<PostgresqlDeploymentConfiguration> configuration = YamlDeserializer.deserializeFromFile(file, PostgresqlDeploymentConfiguration.class);
 
         // Assert
         assertFalse(configuration.isPresent());
@@ -30,7 +30,7 @@ public class PostgresqlDeploymentConfigurationTests {
         File file = new File("");
 
         // Act
-        Optional<PostgresqlConfiguration> configuration = YamlDeserializer.deserializeFromFile(file, PostgresqlConfiguration.class);
+        Optional<PostgresqlDeploymentConfiguration> configuration = YamlDeserializer.deserializeFromFile(file, PostgresqlDeploymentConfiguration.class);
 
         // Assert
         assertFalse(configuration.isPresent());
@@ -43,14 +43,14 @@ public class PostgresqlDeploymentConfigurationTests {
         File file = new File(pathname);
 
         // Act
-        Optional<PostgresqlConfiguration> configuration = YamlDeserializer.deserializeFromFile(file, PostgresqlConfiguration.class);
+        Optional<PostgresqlDeploymentConfiguration> configuration = YamlDeserializer.deserializeFromFile(file, PostgresqlDeploymentConfiguration.class);
 
         // Assert
         assertEquals("localhost", configuration.get().getPostgresqlConfiguration().getHost());
         assertEquals(5432, configuration.get().getPostgresqlConfiguration().getPort());
         assertEquals("admin", configuration.get().getPostgresqlConfiguration().getUser());
         assertEquals("password", configuration.get().getPostgresqlConfiguration().getPassword());
-        assertEquals("database", configuration.get().getPostgresqlConfiguration().getDatabaseName());
+        assertEquals("postgres", configuration.get().getPostgresqlConfiguration().getDatabaseName());
 
         assertEquals("admin@gmail.com", configuration.get().getPgAdminConfiguration().getEmail());
         assertEquals("secret", configuration.get().getPgAdminConfiguration().getPassword());

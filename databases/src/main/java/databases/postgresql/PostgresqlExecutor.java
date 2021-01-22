@@ -1,66 +1,74 @@
 package databases.postgresql;
 
-import java.sql.ResultSet;
+import databases.core.DatabaseResponse;
+import databases.core.ConnectionProvider;
+import databases.core.QueryParameterOperator;
+import databases.core.Deserializer;
+import databases.sql.SqlExecutor;
+
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
-public class PostgresqlExecutor implements databases.core.Executor {
-    PostgresqlConnection connection;
+public class PostgresqlExecutor implements SqlExecutor {
+    ConnectionProvider<Connection> connectionProvider;
 
-    public PostgresqlExecutor(PostgresqlConnection connection) {
-        this.connection = connection;
+    public PostgresqlExecutor(ConnectionProvider<Connection> connectionProvider) {
+        this.connectionProvider = connectionProvider;
     }
 
     @Override
-    public boolean executeUpdate(String update) {
+    public DatabaseResponse executeUpdate(String update, Deserializer deserializer) {
+        return executeSql(update, PostgresqlStatementExecutors.UPDATE_EXECUTOR, deserializer);
+    }
+
+    @Override
+    public DatabaseResponse executeQuery(String query, Deserializer deserializer) {
+        return executeSql(query, PostgresqlStatementExecutors.QUERY_EXECUTOR, deserializer);
+    }
+
+    private DatabaseResponse executeSql(String sql,
+                                        PostgresqlStatementExecutor statementExecutor,
+                                        Deserializer deserializer) {
+        Optional<Connection> connection = connectionProvider.getConnection();
+
+        if (connection.isEmpty())
+            return QueryParameterOperator.PostgresqlErrorResponse.CONNECTION_ERROR;
+
+        Optional<Statement> statement = createSqlStatementWithConnection(sql, connection.get());
+
+        if (statement.isEmpty())
+            return QueryParameterOperator.PostgresqlErrorResponse.STATEMENT_ERROR;
+
         try {
-            java.sql.Connection connection = connect();
-            Statement statement = connection.createStatement();
-            statement.execute(update);
-            commitAndClose(connection, statement);
-            return true;
+            Object results = statementExecutor.apply(statement.get(), sql);
+            Object deserializedResults = deserializer.deserialize(results);
+
+            return DatabaseResponse.success()
+                    .setObject(deserializedResults)
+                    .build();
         } catch (Exception e) {
-           return false;
+            return DatabaseResponse.error()
+                    .setObject(e)
+                    .build();
+        } finally {
+            try {
+                connection.get().commit();
+                statement.get().close();
+                connection.get().close();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
         }
     }
 
-    @Override
-    public <T> Optional<List<T>> execute(String query, PostgresqlDeserializer<T> deserializer) {
+    private Optional<Statement> createSqlStatementWithConnection(String sql, Connection connection) {
         try {
-            java.sql.Connection connection = connect();
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
-            List<T> returnValue = parseResults(resultSet, deserializer);
-            commitAndClose(connection, statement);
-            return Optional.of(returnValue);
-        } catch (Exception e) {
+            return Optional.of(connection.createStatement());
+        } catch (Exception exception) {
             return Optional.empty();
         }
     }
-
-    private java.sql.Connection connect() throws Exception {
-        java.sql.Connection connection = this.connection.connect().orElseThrow(Exception::new);
-        connection.setAutoCommit(false);
-        return connection;
-    }
-
-    private <T> List<T> parseResults(ResultSet resultSet, PostgresqlDeserializer<T> deserializer) throws SQLException {
-        List<T> returnValue = new ArrayList<>();
-
-        while(resultSet.next()) {
-            T deserializedObject = deserializer.deserialize(resultSet);
-            returnValue.add(deserializedObject);
-        }
-
-        return returnValue;
-    }
-
-    private void commitAndClose(java.sql.Connection connection, Statement statement) throws SQLException {
-        connection.commit();
-        statement.close();
-        connection.close();
-    }
 }
+

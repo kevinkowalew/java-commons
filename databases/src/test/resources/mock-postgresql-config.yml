@@ -4,7 +4,8 @@ postgresqlConfiguration:
   port: 5432
   user: "admin"
   password: "password"
-  databaseName: "database"
+  databaseName: "postgres"
+  initScriptName: "init.sql"
 pgAdminConfiguration:
   email: "admin@gmail.com"
   password: "secret"
