@@ -1,16 +1,18 @@
 package docker.controllers;
 
+import com.google.inject.Inject;
 import commons.utils.ShellExcutor;
 
 import java.io.IOException;
 
-public class DeploymentController {
+public class DeploymentRunner {
     private final DeploymentFileWriter writer;
     private final String workingDirectory;
     private final String filename;
     private final ShellExcutor shellExecutor;
 
-    public DeploymentController(DeploymentFileWriter writer, String workingDirectory, String filename, ShellExcutor shellExecutor) {
+    @Inject
+    public DeploymentRunner(DeploymentFileWriter writer, String workingDirectory, String filename, ShellExcutor shellExecutor) {
         this.writer = writer;
         this.workingDirectory = workingDirectory;
         this.filename = filename;
@@ -37,5 +39,4 @@ public class DeploymentController {
     public boolean up() {
         return shellExecutor.execute("docker-compose up", workingDirectory);
     }
-
 }

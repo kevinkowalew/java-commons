@@ -8,8 +8,11 @@ public class MockSqlUpdateDeserializer implements Deserializer {
 
     @Override
     public Object deserialize(Object response) {
-        return OperationResult.SUCCESS;
-//        return response.isError() ? OperationResult.FAILURE : OperationResult.SUCCESS;
+        if (response.equals(0) || response.equals(1)) {
+            return OperationResult.SUCCESS;
+        } else {
+            return OperationResult.FAILURE;
+        }
     }
 }
 
