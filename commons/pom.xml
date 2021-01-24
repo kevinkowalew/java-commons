@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.development.kowalewski</groupId>
         <artifactId>java-miscellany</artifactId>
-        <version>0.0.23</version>
+        <version>0.0.24-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>commons</artifactId>
