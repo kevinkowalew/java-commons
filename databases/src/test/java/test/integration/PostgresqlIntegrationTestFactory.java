@@ -6,12 +6,14 @@ import databases.postgresql.PostgresqlDatabaseFactory;
 import databases.sql.SqlDatabaseController;
 import test.OperationResult;
 import test.mocks.MockDeserializerFactory;
+import test.mocks.MockOperationTypeFactory;
 import test.mocks.MockPostgresqlDatabaseFactory;
 import test.mocks.MockSqlStatementFactory;
 import test.mocks.MockSqlStatementType;
 import test.mocks.MockUser;
 
 import java.util.List;
+import java.util.Optional;
 
 public class PostgresqlIntegrationTestFactory implements SqlDatabaseControllerIntegrationTests.Factory,
         SqlDatabaseControllerIntegrationTests.ErrorCaseOrchestrator {
@@ -21,7 +23,8 @@ public class PostgresqlIntegrationTestFactory implements SqlDatabaseControllerIn
         PostgresqlDatabaseFactory databaseFactory = new MockPostgresqlDatabaseFactory();
         MockSqlStatementFactory statementFactory = new MockSqlStatementFactory();
         MockDeserializerFactory deserializerFactory = new MockDeserializerFactory();
-        return databaseFactory.createController(statementFactory, deserializerFactory);
+        MockOperationTypeFactory mockOperationTypeFactory = new MockOperationTypeFactory();
+        return databaseFactory.createController(statementFactory, deserializerFactory, mockOperationTypeFactory);
     }
 
     @Override
@@ -70,18 +73,17 @@ public class PostgresqlIntegrationTestFactory implements SqlDatabaseControllerIn
 
     public void createTable() {
         DatabaseRequest request = createRequest(MockSqlStatementType.CREATE_TABLE);
-        DatabaseResponse createTableResponse = getSqlDatabaseController().processRequest(request);
+        Optional<DatabaseResponse> createTableResponse = getSqlDatabaseController().processRequest(request);
     }
 
     public void dropTable() {
         DatabaseRequest request = createRequest(MockSqlStatementType.DROP_TABLE);
-        DatabaseResponse createTableResponse = getSqlDatabaseController().processRequest(request);
+        Optional<DatabaseResponse> createTableResponse = getSqlDatabaseController().processRequest(request);
     }
 
     private DatabaseRequest createRequest(MockSqlStatementType type) {
         return DatabaseRequest.newBuilder()
                 .setIdentifier(type.getIdentifier())
-                .setOperationType(type.getOperationType())
                 .build();
     }
 

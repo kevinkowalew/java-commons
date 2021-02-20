@@ -5,6 +5,6 @@ import databases.core.OperationType;
 
 import java.util.Optional;
 
-public interface SqlStatementFactory {
-    Optional<String> createSqlStatementForRequest(DatabaseRequest request);
+public interface OperationTypeFactory {
+    Optional<OperationType> getOperationTypeForRequest(DatabaseRequest request);
 }

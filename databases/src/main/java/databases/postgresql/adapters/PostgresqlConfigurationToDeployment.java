@@ -6,10 +6,6 @@ import docker.components.Service;
 import docker.fields.NamedVolume;
 
 public class PostgresqlConfigurationToDeployment extends Deployment {
-    private PostgresqlConfigurationToDeployment(Deployment.Builder builder) {
-        super(builder);
-    }
-
     public PostgresqlConfigurationToDeployment(PostgresqlDeploymentConfiguration configuration) {
         super(createBuilderForConfiguration(configuration));
     }

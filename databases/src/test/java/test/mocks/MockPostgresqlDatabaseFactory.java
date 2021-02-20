@@ -5,6 +5,7 @@ import databases.core.DeserializerFactory;
 import databases.postgresql.PostgresqlDatabaseController;
 import databases.postgresql.PostgresqlDatabaseFactory;
 import databases.postgresql.PostgresqlDeploymentConfiguration;
+import databases.sql.OperationTypeFactory;
 import databases.sql.SqlStatementFactory;
 
 public class MockPostgresqlDatabaseFactory extends PostgresqlDatabaseFactory {
@@ -21,8 +22,10 @@ public class MockPostgresqlDatabaseFactory extends PostgresqlDatabaseFactory {
         return (PostgresqlDeploymentConfiguration) YamlDeserializer.deserializeFromResource(resourceName, PostgresqlDeploymentConfiguration.class).get();
     }
 
-    public PostgresqlDatabaseController createController(SqlStatementFactory statementFactory, DeserializerFactory deserializerFactory) {
-        return new PostgresqlDatabaseController(createConnection(), statementFactory, deserializerFactory);
+    public PostgresqlDatabaseController createController(SqlStatementFactory statementFactory,
+                                                         DeserializerFactory deserializerFactory,
+                                                         OperationTypeFactory operationTypeFactory) {
+        return new PostgresqlDatabaseController(createConnection(), statementFactory, deserializerFactory, operationTypeFactory);
     }
 }
 

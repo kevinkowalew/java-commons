@@ -1,5 +1,7 @@
 package databases.core;
 
+import java.util.Optional;
+
 public interface DeserializerFactory {
-    Deserializer getDeserializerForRequest(DatabaseRequest request);
+    Optional<Deserializer> getDeserializerForRequest(DatabaseRequest request);
 }

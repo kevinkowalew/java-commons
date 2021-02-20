@@ -1,7 +1,6 @@
 package databases.postgresql;
 
 import databases.core.DatabaseResponse;
-import databases.core.ConnectionProvider;
 import databases.core.QueryParameterOperator;
 import databases.core.Deserializer;
 import databases.sql.SqlExecutor;

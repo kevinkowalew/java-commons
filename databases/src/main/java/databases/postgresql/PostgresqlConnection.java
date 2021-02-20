@@ -1,7 +1,5 @@
 package databases.postgresql;
 
-import databases.core.ConnectionProvider;
-
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Optional;

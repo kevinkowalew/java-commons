@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -16,7 +17,6 @@ import static org.junit.Assert.assertTrue;
 public class SqlDatabaseControllerIntegrationTests {
     private Factory factory;
     private ErrorCaseOrchestrator errorCaseOrchestrator;
-    private DeploymentRunner deploymentRunner;
     private SqlDatabaseController sut;
 
     @Before
@@ -35,6 +35,8 @@ public class SqlDatabaseControllerIntegrationTests {
         // Act...
         List<Object> actualResponseObjects = requests.stream()
                 .map(sut::processRequest)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .map(DatabaseResponse::getObject)
                 .collect(Collectors.toList());
 
@@ -63,9 +65,9 @@ public class SqlDatabaseControllerIntegrationTests {
 
     private DatabaseResponse executeErrorRequest(DatabaseRequest request) {
         errorCaseOrchestrator.setupForErrorCaseRequest(request);
-        DatabaseResponse response = sut.processRequest(request);
+        Optional<DatabaseResponse> response = sut.processRequest(request);
         errorCaseOrchestrator.cleanupForErrorCaseRequest(request);
-        return response;
+        return response.get();
     }
 
     interface Factory {

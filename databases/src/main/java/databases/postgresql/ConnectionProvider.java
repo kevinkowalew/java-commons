@@ -1,4 +1,4 @@
-package databases.core;
+package databases.postgresql;
 
 import java.util.Optional;
 

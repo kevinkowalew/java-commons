@@ -1,22 +1,16 @@
 package databases.postgresql;
 
 import databases.core.DeserializerFactory;
+import databases.sql.OperationTypeFactory;
 import databases.sql.SqlDatabaseController;
 import databases.sql.SqlStatementFactory;
 
 public class PostgresqlDatabaseController extends SqlDatabaseController {
-    PostgresqlConnection connection;
-    DeserializerFactory deserializerFactory;
-
     public PostgresqlDatabaseController(PostgresqlConnection connection,
                                         SqlStatementFactory sqlStatementFactory,
-                                        DeserializerFactory deserializerFactory) {
-        super(new SqlDatabaseControllerPostgresqlFactory(connection, deserializerFactory, sqlStatementFactory));
+                                        DeserializerFactory deserializerFactory,
+                                        OperationTypeFactory operationTypeFactory) {
+        super(new SqlDatabaseControllerPostgresqlFactory(connection, deserializerFactory, sqlStatementFactory, operationTypeFactory));
     }
-
-    private PostgresqlDatabaseController(SqlDatabaseController.AbstractFactory factory) {
-        super(factory);
-    }
-
 }
 

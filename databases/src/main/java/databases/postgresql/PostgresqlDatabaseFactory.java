@@ -3,6 +3,7 @@ package databases.postgresql;
 import databases.core.DeserializerFactory;
 import databases.postgresql.adapters.PostgresqlConfigurationToDeployment;
 import databases.postgresql.adapters.PostgresqlConfigurationToPostgresqlConnection;
+import databases.sql.OperationTypeFactory;
 import databases.sql.SqlStatementFactory;
 import docker.components.Deployment;
 
@@ -18,8 +19,9 @@ public class PostgresqlDatabaseFactory {
     }
 
     public PostgresqlDatabaseController createController(final SqlStatementFactory statementFactory,
-                                                         final DeserializerFactory deserializerFactory) {
-        return new PostgresqlDatabaseController(createConnection(), statementFactory, deserializerFactory);
+                                                         final DeserializerFactory deserializerFactory,
+                                                         final OperationTypeFactory operationTypeFactory) {
+        return new PostgresqlDatabaseController(createConnection(), statementFactory, deserializerFactory, operationTypeFactory);
     }
 
     public PostgresqlConnection createConnection() {

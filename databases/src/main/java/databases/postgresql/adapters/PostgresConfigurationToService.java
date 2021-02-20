@@ -14,11 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PostgresConfigurationToService extends Service {
-
-    private PostgresConfigurationToService(Builder builder) {
-        super(builder);
-    }
-
     public PostgresConfigurationToService(PostgresqlDeploymentConfiguration.PostgresqlConfiguration configuration) {
         super(constructServiceBuilderFromConfiguration(configuration));
     }

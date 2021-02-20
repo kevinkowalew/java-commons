@@ -1,8 +1,10 @@
 package databases.core;
 
+import java.util.Optional;
+
 /**
  * Dao interface used for dependency inversion
  */
 public interface Database {
-    DatabaseResponse processRequest(DatabaseRequest request);
+    Optional<DatabaseResponse> processRequest(DatabaseRequest request);
 }

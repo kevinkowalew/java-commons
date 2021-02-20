@@ -12,11 +12,6 @@ import docker.fields.Volume;
 import docker.fields.enums.Restart;
 
 public class PgAdminConfigurationToService extends Service {
-
-    private PgAdminConfigurationToService(Builder builder) {
-        super(builder);
-    }
-
     public PgAdminConfigurationToService(PostgresqlDeploymentConfiguration.PgAdminConfiguration configuration) {
         super(constructServiceBuilderFromConfiguration(configuration));
     }
