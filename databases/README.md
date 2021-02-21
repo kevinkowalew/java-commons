@@ -1,13 +1,13 @@
 #  Databases
 
-## Intent
-- This module contains abstractions for modeling database transactions.
-- By leveraging unified interfaces and POJOs for data flow in the module 
+![](https://forthebadge.com/images/badges/made-with-java.svg)
+![](https://forthebadge.com/images/badges/built-with-love.svg)
 
-## Unified Interface
+This module contains abstractions for modeling database transactions in a manner independent of underlying database dependencies.
+
+## Unified Interface Entry Point
 ```java
 public interface Database {
     Optional<DatabaseResponse> processRequest(DatabaseRequest request);
 }
 ```
-# Postgresql Setup 
