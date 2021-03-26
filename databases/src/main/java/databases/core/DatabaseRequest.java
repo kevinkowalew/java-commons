@@ -1,7 +1,5 @@
 package databases.core;
 
-import java.util.List;
-
 /**
  *
  */

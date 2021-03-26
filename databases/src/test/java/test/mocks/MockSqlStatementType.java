@@ -19,18 +19,4 @@ public enum MockSqlStatementType {
         return identifier;
     }
 
-    public OperationType getOperationType() {
-        switch (this) {
-            case CREATE_TABLE:
-            case INSERT_USER:
-                return OperationType.CREATE;
-            case SELECT_ALL:
-            case TABLE_EXISTS:
-                return OperationType.READ;
-            case DROP_TABLE:
-                return OperationType.DELETE;
-            default:
-                return null;
-        }
-    }
 }

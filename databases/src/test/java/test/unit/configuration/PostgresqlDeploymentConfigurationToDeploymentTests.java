@@ -1,10 +1,10 @@
 package test.unit.configuration;
 
-import databases.postgresql.DockerImage;
-import databases.postgresql.DockerServiceName;
-import databases.postgresql.adapters.PostgresqlConfigurationToDeployment;
-import databases.postgresql.PostgresqlDeploymentConfiguration;
-import databases.postgresql.PostgresqlEnvironmentVariable;
+import databases.sql.postgresql.docker.DockerImage;
+import databases.sql.postgresql.docker.DockerServiceName;
+import databases.sql.postgresql.configuration.adapters.PostgresqlConfigurationToDeployment;
+import databases.sql.postgresql.configuration.PostgresqlDeploymentConfiguration;
+import databases.sql.postgresql.configuration.PostgresqlEnvironmentVariable;
 import docker.components.Deployment;
 import docker.components.Service;
 import docker.fields.EnvironmentVariable;
@@ -14,7 +14,7 @@ import docker.fields.Port;
 import docker.fields.Volume;
 import docker.fields.enums.Restart;
 import org.junit.Test;
-import test.mocks.MockPostgresqlDatabaseFactory;
+import test.mocks.MockDatabaseControllerModule;
 
 import java.io.IOException;
 
@@ -25,7 +25,7 @@ public class PostgresqlDeploymentConfigurationToDeploymentTests {
     @Test
     public void testConfigurationToDockerDeployment() throws IOException {
         // Arrange..
-        PostgresqlDeploymentConfiguration mockConfiguration = MockPostgresqlDatabaseFactory.getMockConfiguration();
+        PostgresqlDeploymentConfiguration mockConfiguration = MockDatabaseControllerModule.getMockConfiguration();
 
         // Act..
         PostgresqlConfigurationToDeployment deployment = new PostgresqlConfigurationToDeployment(mockConfiguration);

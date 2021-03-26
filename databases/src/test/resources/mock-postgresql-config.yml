@@ -1,6 +1,6 @@
 ---
 postgresqlConfiguration:
-  host: "localhost"
+  host: "172.18.0.2"
   port: 5432
   user: "admin"
   password: "password"

@@ -2,7 +2,7 @@ package test.unit.configuration;
 
 import com.google.common.io.Resources;
 import commons.utils.YamlDeserializer;
-import databases.postgresql.PostgresqlDeploymentConfiguration;
+import databases.sql.postgresql.configuration.PostgresqlDeploymentConfiguration;
 import org.junit.Test;
 
 import java.io.File;
@@ -46,7 +46,7 @@ public class PostgresqlDeploymentConfigurationTests {
         Optional<PostgresqlDeploymentConfiguration> configuration = YamlDeserializer.deserializeFromFile(file, PostgresqlDeploymentConfiguration.class);
 
         // Assert
-        assertEquals("localhost", configuration.get().getPostgresqlConfiguration().getHost());
+        assertEquals("172.18.0.2", configuration.get().getPostgresqlConfiguration().getHost());
         assertEquals(5432, configuration.get().getPostgresqlConfiguration().getPort());
         assertEquals("admin", configuration.get().getPostgresqlConfiguration().getUser());
         assertEquals("password", configuration.get().getPostgresqlConfiguration().getPassword());
