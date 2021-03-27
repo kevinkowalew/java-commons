@@ -1,17 +1,18 @@
 package databases.core;
 
-import databases.sql.postgresql.statements.builders.InsertStatementBuilder;
-import databases.sql.postgresql.statements.builders.SelectStatementBuilder;
+import databases.sql.postgresql.statements.builders.InsertStatement;
+import databases.sql.postgresql.statements.builders.SelectStatement;
 import databases.sql.postgresql.statements.builders.UpdateStatementBuilder;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
  * Dao interface used for dependency inversion
  */
 public interface Database {
-    Optional<Object> insert(InsertStatementBuilder insertStatementBuilder);
-    Optional<Object> read(SelectStatementBuilder selectStatementBuilder);
-    Optional<Object> update(UpdateStatementBuilder updateStatementBuilder);
-    Optional<Object> delete(SelectStatementBuilder selectStatementBuilder);
+    boolean insert(InsertStatement.Builder builder);
+    <T> Optional<List<T>> read(SelectStatement.Builder builder, Deserializer deserializer, Class<T> tClass);
+    Boolean update(UpdateStatementBuilder updateStatementBuilder);
+    Boolean delete(SelectStatement.Builder builder);
 }

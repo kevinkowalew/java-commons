@@ -50,7 +50,6 @@ public class PostgresqlDeploymentConfigurationToDeploymentTests {
         final EnvironmentVariable password = new EnvironmentVariable(PostgresqlEnvironmentVariable.POSTGRES_PASSWORD, "password");
         final EnvironmentVariable port = new EnvironmentVariable(PostgresqlEnvironmentVariable.POSTGRES_PORT, 5432);
 
-        final Volume databaseInitScript = new Volume("./init.sql", "/docker-entrypoint-initdb.d/init.sql");
         final Volume databaseData = new Volume("database-data", "/var/lib/postgresql/data/");
 
         return Service.newBuilder()
@@ -59,7 +58,7 @@ public class PostgresqlDeploymentConfigurationToDeploymentTests {
                 .setRestart(Restart.ALWAYS)
                 .setPorts(new Port(5432, 5432))
                 .setEnvironmentVariables(username, password, port)
-                .setVolumes(databaseInitScript, databaseData)
+                .setVolumes(databaseData)
                 .build();
     }
 

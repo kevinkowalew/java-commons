@@ -4,6 +4,7 @@ import databases.sql.Column;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CreateTableStatement {
@@ -15,7 +16,7 @@ public class CreateTableStatement {
             return Optional.empty();
         } else {
             CreateTableStatement.Builder builder = newBuilder().setTableName(schema.getTableName());
-            final List<Column> columnList = schema.getColumnList();
+            final Set<Column> columnList = schema.getColumns();
             columnList.forEach(builder::addColumn);
             return builder.build();
         }

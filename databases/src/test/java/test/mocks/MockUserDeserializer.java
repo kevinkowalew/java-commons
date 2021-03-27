@@ -1,7 +1,6 @@
 package test.mocks;
 
 import test.DatabaseResponseGenericListDeserializer;
-import test.mocks.MockUser;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,9 +11,11 @@ public class MockUserDeserializer extends DatabaseResponseGenericListDeserialize
     @Override
     public Optional<MockUser> deserializeRow(ResultSet resultSet) {
         try {
-            int id = resultSet.getInt("Id");
-            String name = resultSet.getString("Name");
-            MockUser user = new MockUser(id, name);
+            String id = resultSet.getString(MockColumns.ID.getName());
+            String email = resultSet.getString(MockColumns.EMAIL.getName());
+            String salt = resultSet.getString(MockColumns.SALT.getName());
+            String hashedPassword= resultSet.getString(MockColumns.HASHED_PASSWORD.getName());
+            MockUser user = new MockUser(id, email, salt, hashedPassword);
             return Optional.of(user);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -22,4 +23,3 @@ public class MockUserDeserializer extends DatabaseResponseGenericListDeserialize
         }
     }
 }
-

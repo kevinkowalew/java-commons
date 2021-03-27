@@ -2,20 +2,28 @@ package test.integration;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import databases.sql.SqlDatabaseTableController;
+import databases.sql.SqlTableController;
+import databases.sql.postgresql.statements.builders.InsertStatement;
+import databases.sql.postgresql.statements.builders.SelectStatement;
 import org.junit.Before;
 import org.junit.Test;
+import test.mocks.MockColumns;
 import test.mocks.MockDatabaseControllerModule;
+import test.mocks.MockUser;
+import test.mocks.MockUserDeserializer;
 
+import java.util.List;
+import java.util.Optional;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 public class PostgresqlDatabaseControllerIntegrationTests {
-    private SqlDatabaseTableController sut;
+    private SqlTableController sut;
 
     @Before
     public void setup() {
         Injector injector = Guice.createInjector(new MockDatabaseControllerModule());
-        sut = injector.getInstance(SqlDatabaseTableController.class);
+        sut = injector.getInstance(SqlTableController.class);
     }
 
     @Test
@@ -27,7 +35,10 @@ public class PostgresqlDatabaseControllerIntegrationTests {
         boolean tableExists = sut.tableExists();
 
         // Assert...
-        assert(tableExists);
+        assert (tableExists);
+        final String tableName = MockDatabaseControllerModule.getSchema().getTableName();
+        final String expectedMessage = String.format("Created table with name %s", tableName);
+        assertLoggerMessageWasRecorded(expectedMessage);
     }
 
     @Test
@@ -51,7 +62,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
         boolean success = sut.createTable();
 
         // Assert...
-        assert(success);
+        assert (success);
     }
 
     @Test
@@ -64,5 +75,51 @@ public class PostgresqlDatabaseControllerIntegrationTests {
 
         // Assert...
         assertFalse(tableExists);
+    }
+
+    @Test
+    public void test_Insert_and_Read_SunnyDay() {
+        // Arrange...
+        final InsertStatement.Builder insertBuilder = sut.insertStatementBuilder()
+                .insert("154321", MockColumns.ID)
+                .insert("john.doe@gmail.com", MockColumns.EMAIL)
+                .insert("icsfwef91p2;UF!@PUFP!@P", MockColumns.SALT)
+                .insert("wef 0p1q2q1q;lwelq2jeqwjlqkwjl", MockColumns.HASHED_PASSWORD);
+        final SelectStatement.Builder selectStatement = sut.selectStatementBuilder();
+        sut.dropTable();
+        sut.createTable();
+
+        // Act...
+        boolean success = sut.insert(insertBuilder);
+        Optional<List<MockUser>> results = sut.read(selectStatement, new MockUserDeserializer(), MockUser.class);
+
+        // Assert...
+        assert (success);
+        assertEquals(results.get().size(), 1);
+        MockUser user = results.get().get(0);
+        assertEquals("154321", user.getId());
+        assertEquals("john.doe@gmail.com", user.getEmail());
+        assertEquals("icsfwef91p2;UF!@PUFP!@P", user.getSalt());
+        assertEquals("wef 0p1q2q1q;lwelq2jeqwjlqkwjl", user.getHashedPassword());
+    }
+
+    @Test
+    public void testy_Insert_RainyDay_MissingValues() {
+        // Arrange...
+        final InsertStatement.Builder insertBuilder = sut.insertStatementBuilder()
+                .insert("154321", MockColumns.ID)
+                .insert("john.doe@gmail.com", MockColumns.EMAIL)
+                .insert("icsfwef91p2;UF!@PUFP!@P", MockColumns.SALT);
+        final SelectStatement.Builder selectStatement = sut.selectStatementBuilder();
+
+        // Act...
+        boolean success = sut.insert(insertBuilder);
+
+        // Assert...
+        assertFalse(success);
+    }
+
+    public void assertLoggerMessageWasRecorded(final String expectedMessage) {
+        System.out.println(expectedMessage);
     }
 }

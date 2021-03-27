@@ -1,43 +1,47 @@
 package test.mocks;
 
-import java.util.Objects;
-
 public class MockUser {
-    int id;
-    String name;
+    String id;
+    String email;
+    String salt;
+    String hashedPassword;
 
-    public MockUser(int id, String name) {
+    public MockUser(String id, String name, String salt, String hashedPassword) {
         this.id = id;
-        this.name = name;
+        this.email = name;
+        this.salt = salt;
+        this.hashedPassword = hashedPassword;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getEmail() {
+        return email;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        MockUser mockUser = (MockUser) o;
-        return id == mockUser.id && Objects.equals(name, mockUser.name);
+    public String getSalt() {
+        return salt;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name);
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
+
+    public String getHashedPassword() {
+        return hashedPassword;
+    }
+
+    public void setHashedPassword(String hashedPassword) {
+        this.hashedPassword = hashedPassword;
     }
 }
-

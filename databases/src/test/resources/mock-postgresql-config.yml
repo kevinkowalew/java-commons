@@ -1,11 +1,10 @@
 ---
 postgresqlConfiguration:
-  host: "172.18.0.2"
+  host: "localhost"
   port: 5432
   user: "admin"
   password: "password"
   databaseName: "postgres"
-  initScriptName: "init.sql"
 pgAdminConfiguration:
   email: "admin@gmail.com"
   password: "secret"

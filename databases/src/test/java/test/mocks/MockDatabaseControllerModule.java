@@ -2,6 +2,7 @@ package test.mocks;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import commons.utils.YamlDeserializer;
 import databases.sql.Column;
 import databases.sql.SqlExecutor;
@@ -10,8 +11,10 @@ import databases.sql.postgresql.configuration.PostgresqlDeploymentConfiguration;
 import databases.sql.postgresql.configuration.adapters.PostgresqlConfigurationToPostgresqlConnection;
 import databases.sql.postgresql.executors.PostgresqlExecutor;
 import databases.sql.postgresql.statements.DatabaseTableSchema;
+import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 
-import java.util.List;
+import java.util.Set;
 
 public class MockDatabaseControllerModule extends AbstractModule {
     public static PostgresqlDeploymentConfiguration getMockConfiguration() {
@@ -28,12 +31,13 @@ public class MockDatabaseControllerModule extends AbstractModule {
         return new PostgresqlExecutor(getConnection());
     }
 
-    @Provides static DatabaseTableSchema getSchema() {
-        List<Column> columnList = List.of(
-                Column.with("Id", Column.Type.SERIAL_PRIMARY_KEY),
-                Column.with("Email", Column.Type.VARCHAR_255),
-                Column.with("Salt", Column.Type.VARCHAR_255),
-                Column.with("Hashed Password", Column.Type.VARCHAR_255)
+    @Provides
+    public static DatabaseTableSchema getSchema() {
+        Set<Column> columnList = Set.of(
+                Column.with("Id", Column.Type.SERIAL_PRIMARY_KEY, true),
+                Column.with("Email", Column.Type.VARCHAR_255, true),
+                Column.with("Salt", Column.Type.VARCHAR_255, true),
+                Column.with("Hashed Password", Column.Type.VARCHAR_255, true)
         );
 
         return new DatabaseTableSchema("Users", columnList);
