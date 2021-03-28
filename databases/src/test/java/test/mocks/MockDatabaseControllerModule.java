@@ -2,7 +2,6 @@ package test.mocks;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.google.inject.Singleton;
 import commons.utils.YamlDeserializer;
 import databases.sql.Column;
 import databases.sql.SqlExecutor;
@@ -11,8 +10,6 @@ import databases.sql.postgresql.configuration.PostgresqlDeploymentConfiguration;
 import databases.sql.postgresql.configuration.adapters.PostgresqlConfigurationToPostgresqlConnection;
 import databases.sql.postgresql.executors.PostgresqlExecutor;
 import databases.sql.postgresql.statements.DatabaseTableSchema;
-import org.apache.log4j.Logger;
-import org.slf4j.Logger;
 
 import java.util.Set;
 

@@ -1,5 +1,6 @@
 package databases.core;
 
+import databases.sql.postgresql.statements.DeleteStatement;
 import databases.sql.postgresql.statements.builders.InsertStatement;
 import databases.sql.postgresql.statements.builders.SelectStatement;
 import databases.sql.postgresql.statements.builders.UpdateStatementBuilder;
@@ -14,5 +15,5 @@ public interface Database {
     boolean insert(InsertStatement.Builder builder);
     <T> Optional<List<T>> read(SelectStatement.Builder builder, Deserializer deserializer, Class<T> tClass);
     Boolean update(UpdateStatementBuilder updateStatementBuilder);
-    Boolean delete(SelectStatement.Builder builder);
+    Boolean delete(DeleteStatement.Builder builder);
 }

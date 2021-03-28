@@ -2,10 +2,7 @@ package databases.sql;
 
 import com.google.inject.Inject;
 import databases.core.*;
-import databases.sql.postgresql.statements.CreateTableStatement;
-import databases.sql.postgresql.statements.DatabaseTableSchema;
-import databases.sql.postgresql.statements.DropTableStatement;
-import databases.sql.postgresql.statements.TableExistsStatement;
+import databases.sql.postgresql.statements.*;
 import databases.sql.postgresql.statements.builders.InsertStatement;
 import databases.sql.postgresql.statements.builders.SelectStatement;
 import databases.sql.postgresql.statements.builders.UpdateStatementBuilder;
@@ -65,11 +62,16 @@ public class SqlTableController implements Database {
         return SelectStatement.newBuilder(schema);
     }
 
+    public DeleteStatement.Builder deleteStatementBuilder() {
+        return DeleteStatement.newBuilder(schema);
+    }
+
     @Override
     public boolean insert(InsertStatement.Builder builder) {
         try {
             if (insertBuilderIsMissingRequiredFields(builder)) {
                 // TODO: Add logging here
+                return false;
             }
 
             final String statement = builder.build();
@@ -98,8 +100,14 @@ public class SqlTableController implements Database {
     }
 
     @Override
-    public Boolean delete(SelectStatement.Builder builder) {
-        return false;
+    public Boolean delete(DeleteStatement.Builder builder) {
+        try {
+            final String statement = builder.build();
+            return executeUpdateWithBooleanReturnValue(statement, new SQLUpdateDeserializer());
+        } catch (Exception e) {
+            // TODO: Add logging here
+            return false;
+        }
     }
 
     private Boolean executeUpdateWithBooleanReturnValue(final String statement, final Deserializer deserializer) {

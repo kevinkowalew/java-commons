@@ -2,7 +2,11 @@ package test.integration;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import databases.sql.Column;
 import databases.sql.SqlTableController;
+import databases.sql.postgresql.statements.DeleteStatement;
+import databases.sql.postgresql.statements.WhereClause;
+import databases.sql.postgresql.statements.WhereClauseOperator;
 import databases.sql.postgresql.statements.builders.InsertStatement;
 import databases.sql.postgresql.statements.builders.SelectStatement;
 import org.junit.Before;
@@ -14,6 +18,7 @@ import test.mocks.MockUserDeserializer;
 
 import java.util.List;
 import java.util.Optional;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -104,7 +109,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     }
 
     @Test
-    public void testy_Insert_RainyDay_MissingValues() {
+    public void test_Insert_RainyDay_MissingValues() {
         // Arrange...
         final InsertStatement.Builder insertBuilder = sut.insertStatementBuilder()
                 .insert("154321", MockColumns.ID)
@@ -117,6 +122,56 @@ public class PostgresqlDatabaseControllerIntegrationTests {
 
         // Assert...
         assertFalse(success);
+    }
+
+    @Test
+    public void test_Insert_RainyDay_NonexistentColumn() {
+        // Arrange...
+        final Column missingColumn = Column.with("Missing Column", Column.Type.VARCHAR_255, false);
+        final InsertStatement.Builder insertBuilder = sut.insertStatementBuilder()
+                .insert("154321", missingColumn);
+        final SelectStatement.Builder selectStatement = sut.selectStatementBuilder();
+
+        // Act...
+        boolean success = sut.insert(insertBuilder);
+
+        // Assert...
+        assertFalse(success);
+    }
+
+    @Test
+    public void test_Delete_SunnyDay() {
+        // Arrange...
+        final InsertStatement.Builder insertBuilder = sut.insertStatementBuilder()
+                .insert("154321", MockColumns.ID)
+                .insert("john.doe@gmail.com", MockColumns.EMAIL)
+                .insert("icsfwef91p2;UF!@PUFP!@P", MockColumns.SALT)
+                .insert("wef 0p1q2q1q;lwelq2jeqwjlqkwjl", MockColumns.HASHED_PASSWORD);
+        final SelectStatement.Builder selectBuilder = sut.selectStatementBuilder();
+        final WhereClause clause = new WhereClause(MockColumns.ID, "154321", WhereClauseOperator.EQUALS);
+        final DeleteStatement.Builder deleteBuilder = sut.deleteStatementBuilder().where(clause);
+
+        // Act...
+        boolean insertSuccess = sut.insert(insertBuilder);
+        Optional<List<MockUser>> firstReadResults = sut.read(
+                sut.selectStatementBuilder(),
+                new MockUserDeserializer(),
+                MockUser.class
+        );
+        boolean deleteSuccess = sut.delete(deleteBuilder);
+        Optional<List<MockUser>> secondReadResults = sut.read(
+                sut.selectStatementBuilder(),
+                new MockUserDeserializer(),
+                MockUser.class
+        );
+
+        // Assert...
+        assert(insertSuccess);
+        assert(firstReadResults.isPresent());
+        assertEquals(firstReadResults.get().size(), 1);
+        assert(deleteSuccess);
+        assert(secondReadResults.isPresent());
+        assert(secondReadResults.get().isEmpty());
     }
 
     public void assertLoggerMessageWasRecorded(final String expectedMessage) {

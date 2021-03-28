@@ -10,8 +10,8 @@ public class DeleteStatement {
     public DeleteStatement() {
     }
 
-    public static DeleteStatement.Builder newBuilder(String tableName) {
-        return new DeleteStatement.Builder(tableName);
+    public static DeleteStatement.Builder newBuilder(final DatabaseTableSchema schema) {
+        return new DeleteStatement.Builder(schema.getTableName());
     }
 
     private static String createWhereClauseDescription(WhereClause clause) {
