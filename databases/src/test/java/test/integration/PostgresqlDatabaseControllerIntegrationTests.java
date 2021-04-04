@@ -1,15 +1,14 @@
 package test.integration;
 
 import com.google.inject.Guice;
-import com.google.inject.Injector;
 import databases.sql.Column;
-import databases.sql.SqlTableController;
+import databases.sql.TableController;
 import databases.sql.postgresql.statements.DeleteStatement;
 import databases.sql.postgresql.statements.WhereClause;
 import databases.sql.postgresql.statements.WhereClauseOperator;
 import databases.sql.postgresql.statements.builders.InsertStatement;
 import databases.sql.postgresql.statements.builders.SelectStatement;
-import org.junit.Before;
+import databases.sql.postgresql.statements.builders.UpdateStatement;
 import org.junit.Test;
 import test.mocks.MockColumns;
 import test.mocks.MockDatabaseControllerModule;
@@ -23,13 +22,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 public class PostgresqlDatabaseControllerIntegrationTests {
-    private SqlTableController sut;
+    private static final String MOCK_ID ="154321";
+    private static final String MOCK_EMAIL = "john.doe@gmail.com";
+    private static final String MOCK_SALT = "icsfwef91p2;UF!@PUFP!@P";
+    private static final String MOCK_HASHED_PASSWORD = "wef 0p1q2q1q;lwelq2jeqwjlqkwjl";
 
-    @Before
-    public void setup() {
-        Injector injector = Guice.createInjector(new MockDatabaseControllerModule());
-        sut = injector.getInstance(SqlTableController.class);
-    }
+    private static TableController sut = Guice.createInjector(new MockDatabaseControllerModule())
+            .getInstance(TableController.class);
+    private static InsertStatement.Builder VALID_INSERT_STATEMENT_BUILDER = sut.insertStatementBuilder()
+            .insert(MOCK_ID, MockColumns.ID)
+            .insert(MOCK_EMAIL, MockColumns.EMAIL)
+            .insert(MOCK_SALT, MockColumns.SALT)
+            .insert(MOCK_HASHED_PASSWORD, MockColumns.HASHED_PASSWORD);
 
     @Test
     public void test_TableExists_ReturnsTrue_For_Existing_Table() {
@@ -85,11 +89,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     @Test
     public void test_Insert_and_Read_SunnyDay() {
         // Arrange...
-        final InsertStatement.Builder insertBuilder = sut.insertStatementBuilder()
-                .insert("154321", MockColumns.ID)
-                .insert("john.doe@gmail.com", MockColumns.EMAIL)
-                .insert("icsfwef91p2;UF!@PUFP!@P", MockColumns.SALT)
-                .insert("wef 0p1q2q1q;lwelq2jeqwjlqkwjl", MockColumns.HASHED_PASSWORD);
+        final InsertStatement.Builder insertBuilder = VALID_INSERT_STATEMENT_BUILDER;
         final SelectStatement.Builder selectStatement = sut.selectStatementBuilder();
         sut.dropTable();
         sut.createTable();
@@ -142,13 +142,8 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     @Test
     public void test_Delete_SunnyDay() {
         // Arrange...
-        final InsertStatement.Builder insertBuilder = sut.insertStatementBuilder()
-                .insert("154321", MockColumns.ID)
-                .insert("john.doe@gmail.com", MockColumns.EMAIL)
-                .insert("icsfwef91p2;UF!@PUFP!@P", MockColumns.SALT)
-                .insert("wef 0p1q2q1q;lwelq2jeqwjlqkwjl", MockColumns.HASHED_PASSWORD);
-        final SelectStatement.Builder selectBuilder = sut.selectStatementBuilder();
-        final WhereClause clause = new WhereClause(MockColumns.ID, "154321", WhereClauseOperator.EQUALS);
+        final InsertStatement.Builder insertBuilder = VALID_INSERT_STATEMENT_BUILDER;
+        final WhereClause clause = new WhereClause(MockColumns.ID, MOCK_ID, WhereClauseOperator.EQUALS);
         final DeleteStatement.Builder deleteBuilder = sut.deleteStatementBuilder().where(clause);
 
         // Act...
@@ -166,12 +161,59 @@ public class PostgresqlDatabaseControllerIntegrationTests {
         );
 
         // Assert...
-        assert(insertSuccess);
-        assert(firstReadResults.isPresent());
+        assert (firstReadResults.isPresent());
         assertEquals(firstReadResults.get().size(), 1);
-        assert(deleteSuccess);
-        assert(secondReadResults.isPresent());
-        assert(secondReadResults.get().isEmpty());
+        assert (deleteSuccess);
+        assert (secondReadResults.isPresent());
+        assert (secondReadResults.get().isEmpty());
+    }
+
+    @Test
+    public void test_Update_SunnyDay() {
+        // Arrange...
+        final String updatedEmail = "jane.doe@gmail.com";
+        final String updatedSalt = "my new salt";
+        final String updatedHashedPassword = "my new hashed password";
+        final InsertStatement.Builder insertBuilder = VALID_INSERT_STATEMENT_BUILDER;
+        final WhereClause clause = new WhereClause(MockColumns.ID, MOCK_ID, WhereClauseOperator.EQUALS);
+        final UpdateStatement.Builder updateBuilder = sut.updateStatementBuilder()
+                .where(clause)
+                .update(updatedEmail, MockColumns.EMAIL)
+                .update(updatedSalt, MockColumns.SALT)
+                .update(updatedHashedPassword, MockColumns.HASHED_PASSWORD);
+
+        // Act...
+        sut.dropTable();
+        sut.createTable();
+        boolean insertSuccess = sut.insert(insertBuilder);
+        Optional<List<MockUser>> firstReadResults = sut.read(
+                sut.selectStatementBuilder(),
+                new MockUserDeserializer(),
+                MockUser.class
+        );
+        boolean updateSuccess = sut.update(updateBuilder);
+        Optional<List<MockUser>> secondReadResults = sut.read(
+                sut.selectStatementBuilder(),
+                new MockUserDeserializer(),
+                MockUser.class
+        );
+
+        // Assert...
+        assertEquals(firstReadResults.get().size(), 1);
+        MockUser user = firstReadResults.get().get(0);
+        assertEquals(MOCK_ID, user.getId());
+        assertEquals(MOCK_EMAIL, user.getEmail());
+        assertEquals(MOCK_SALT, user.getSalt());
+        assertEquals(MOCK_HASHED_PASSWORD, user.getHashedPassword());
+
+        assert(updateSuccess);
+
+        assertEquals(secondReadResults.get().size(), 1);
+        user = secondReadResults.get().get(0);
+        assertEquals(MOCK_ID, user.getId());
+        assertEquals(updatedEmail, user.getEmail());
+        assertEquals(updatedSalt, user.getSalt());
+        assertEquals(updatedHashedPassword, user.getHashedPassword());
     }
 
     public void assertLoggerMessageWasRecorded(final String expectedMessage) {

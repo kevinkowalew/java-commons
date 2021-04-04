@@ -5,7 +5,7 @@ import databases.core.*;
 import databases.sql.postgresql.statements.*;
 import databases.sql.postgresql.statements.builders.InsertStatement;
 import databases.sql.postgresql.statements.builders.SelectStatement;
-import databases.sql.postgresql.statements.builders.UpdateStatementBuilder;
+import databases.sql.postgresql.statements.builders.UpdateStatement;
 import databases.sql.postgresql.deserializers.TableExistsDeserializer;
 
 import java.util.*;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * Base class for concrete sql data access implementations to subclass
  */
-public class SqlTableController implements Database {
+public class TableController implements Database {
     @Inject
     private SqlExecutor executor;
 
@@ -66,6 +66,10 @@ public class SqlTableController implements Database {
         return DeleteStatement.newBuilder(schema);
     }
 
+    public UpdateStatement.Builder updateStatementBuilder() {
+        return UpdateStatement.newBuilder(schema);
+    }
+
     @Override
     public boolean insert(InsertStatement.Builder builder) {
         try {
@@ -88,15 +92,21 @@ public class SqlTableController implements Database {
         try {
             final String query = builder.build();
             return executeQueryWithListReturnValue(query, deserializer, tClass);
-        } catch (Exception e){
+        } catch (Exception e) {
             // TODO: Add logging here
             return Optional.empty();
         }
     }
 
     @Override
-    public Boolean update(UpdateStatementBuilder updateStatementBuilder) {
-        return false;
+    public Boolean update(UpdateStatement.Builder builder) {
+        try {
+            final String statement = builder.build();
+            return executeUpdateWithBooleanReturnValue(statement, new SQLUpdateDeserializer());
+        } catch (Exception e) {
+            // TODO: Add logging here
+            return false;
+        }
     }
 
     @Override
@@ -130,7 +140,7 @@ public class SqlTableController implements Database {
 
             final List<T> returnValue = new ArrayList<>(response.get().size());
 
-            for(Object object : response.get()) {
+            for (Object object : response.get()) {
                 if (!tClass.isInstance(object)) {
                     // TODO: add logging here
                     continue;

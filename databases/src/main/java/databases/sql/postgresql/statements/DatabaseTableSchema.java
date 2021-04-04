@@ -8,11 +8,18 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class DatabaseTableSchema {
-    private final String postgresqlSchemaName = "public";
+    private final String postgresqlSchemaName;
     private final String tableName;
     private final Set<Column> columns;
 
+    public DatabaseTableSchema(String postgresqlSchemaName, String tableName, Set<Column> columns) {
+        this.postgresqlSchemaName = postgresqlSchemaName;
+        this.tableName = tableName;
+        this.columns = columns;
+    }
+
     public DatabaseTableSchema(String tableName, Set<Column> columns) {
+        this.postgresqlSchemaName = "public";
         this.tableName = tableName;
         this.columns = columns;
     }
