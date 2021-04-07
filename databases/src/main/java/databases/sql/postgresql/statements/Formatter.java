@@ -4,11 +4,19 @@ import databases.core.ColumnValuePair;
 import databases.sql.Column;
 import databases.sql.postgresql.statements.builders.CompoundClause;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class Formatter {
+
+    public static String createColumnsDescription(List<Column> columns) {
+        return columns.stream().map(Formatter::createColumnDescription).collect(Collectors.joining(", "));
+    }
+
     public static String createColumnDescription(Column column) {
-        String typeDescription = createColumnTypeDescription(column.getType());
-        String columnName = surroundString(column.getName(), "\"");
-        String description = joinWithSpace(columnName, typeDescription);
+        final String typeDescription = createColumnTypeDescription(column.getType());
+        final String columnName = surroundString(column.getName(), "\"");
+        final String description = joinWithSpace(columnName, typeDescription);
         return "\t" + description;
     }
 
@@ -32,11 +40,11 @@ public class Formatter {
     }
 
     public static String createWhereClauseDescription(WhereClause clause) {
-        String valueDescription = createValueDescription(clause.getValue());
+        final String valueDescription = createValueDescription(clause.getValue());
         return String.format("\"%s\" %s %s", clause.getColumn().getName(), clause.getOperator().get(), valueDescription);
     }
     public static String createOperatorWhereClauseDescription(Pair<LogicalOperator, WhereClause> operatorWhereClausePair) {
-        String whereClauseDescription = createWhereClauseDescription(operatorWhereClausePair.getValue());
+        final String whereClauseDescription = createWhereClauseDescription(operatorWhereClausePair.getValue());
         return String.format("%s %s", operatorWhereClausePair.getKey(), whereClauseDescription);
     }
 
@@ -61,7 +69,7 @@ public class Formatter {
     }
 
     private static String createTrailingClauseDescription(Pair<LogicalOperator, WhereClause> operatorWhereClausePair) {
-        String whereClauseDescription = createWhereClauseDescription((WhereClause) operatorWhereClausePair.getValue());
+        final String whereClauseDescription = createWhereClauseDescription((WhereClause) operatorWhereClausePair.getValue());
         return String.format("%s %s", operatorWhereClausePair.getKey(), whereClauseDescription);
     }
 

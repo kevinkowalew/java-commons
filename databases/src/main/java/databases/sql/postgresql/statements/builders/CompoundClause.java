@@ -4,6 +4,7 @@ import databases.sql.postgresql.statements.LogicalOperator;
 import databases.sql.postgresql.statements.Pair;
 import databases.sql.postgresql.statements.WhereClause;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CompoundClause {
@@ -29,7 +30,7 @@ public class CompoundClause {
 
     public static class Builder {
         private WhereClause leadingClause;
-        private List<Pair<LogicalOperator, WhereClause>> trailingClauses;
+        private List<Pair<LogicalOperator, WhereClause>> trailingClauses = new ArrayList<>();
 
         private Builder() {
         }
@@ -54,7 +55,7 @@ public class CompoundClause {
         }
 
         private void addTrailingClauseWithOperator(WhereClause clause, LogicalOperator operator) {
-            final Pair<LogicalOperator, WhereClause> pair = new Pair<>(LogicalOperator.AND, clause);
+            final Pair<LogicalOperator, WhereClause> pair = new Pair<>(operator, clause);
             this.trailingClauses.add(pair);
         }
     }

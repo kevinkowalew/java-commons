@@ -1,15 +1,21 @@
 package databases.sql;
 
 import com.google.inject.Inject;
-import databases.core.*;
+import databases.core.ColumnValuePair;
+import databases.core.Database;
+import databases.core.DatabaseResponse;
+import databases.core.Deserializer;
+import databases.sql.postgresql.deserializers.TableExistsDeserializer;
 import databases.sql.postgresql.statements.*;
 import databases.sql.postgresql.statements.builders.InsertStatement;
 import databases.sql.postgresql.statements.builders.SelectStatement;
 import databases.sql.postgresql.statements.builders.UpdateStatement;
-import databases.sql.postgresql.deserializers.TableExistsDeserializer;
-
-import java.util.*;
 import org.slf4j.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 

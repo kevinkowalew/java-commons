@@ -46,7 +46,7 @@ public class Column {
         SERIAL_PRIMARY_KEY,
         VARCHAR_255;
 
-        private Type() {
+        Type() {
         }
     }
 }

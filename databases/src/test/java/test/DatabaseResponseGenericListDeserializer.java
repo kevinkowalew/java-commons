@@ -14,6 +14,10 @@ public abstract class DatabaseResponseGenericListDeserializer <T> implements Des
     @Override
     public Object deserialize(Object response) {
         try {
+            if (response == null) {
+                return null;
+            }
+
             ResultSet resultSet = (ResultSet) response;
 
             List<T> returnValue = new ArrayList<>();

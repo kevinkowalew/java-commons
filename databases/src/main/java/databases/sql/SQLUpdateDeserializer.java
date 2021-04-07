@@ -7,6 +7,6 @@ public class SQLUpdateDeserializer implements Deserializer {
     }
 
     public Object deserialize(Object response) {
-        return !(response instanceof Integer) ? false : response.equals(0) || response.equals(1);
+        return response instanceof Integer && (response.equals(0) || response.equals(1));
     }
 }

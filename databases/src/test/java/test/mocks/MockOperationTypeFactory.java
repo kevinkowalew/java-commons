@@ -1,10 +1,5 @@
 package test.mocks;
 
-import databases.core.DatabaseRequest;
-import databases.core.OperationType;
-
-import java.util.Optional;
-
 //public class MockOperationTypeFactory implements OperationTypeFactory {
 //    @Override
 //    public Optional<OperationType> getOperationTypeForRequest(DatabaseRequest request) {

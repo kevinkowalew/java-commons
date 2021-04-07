@@ -1,12 +1,13 @@
 package databases.sql.postgresql.statements.builders;
 
-import databases.core.ColumnValuePair;
+import databases.sql.Column;
 import databases.sql.SqlStatementBuilderException;
 import databases.sql.postgresql.statements.DatabaseTableSchema;
+import databases.sql.postgresql.statements.Formatter;
+import databases.sql.postgresql.statements.WhereClause;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SelectStatement {
     private SelectStatement() {
@@ -19,55 +20,45 @@ public class SelectStatement {
 
     public static class Builder {
         private final String tableName;
-        private final List<String> selectedColumnNames = new ArrayList<>();
-        private final List<ColumnValuePair> queryParams = new ArrayList<>();
+        private final List<Column> selectedColumnNames = new ArrayList<>();
+        private CompoundClause.Builder clauseBuilder = CompoundClause.newBuilder();
 
         private Builder(final String tableName) {
             this.tableName = tableName;
         }
 
-        public Builder selectColumn(String columnName) {
-            this.selectedColumnNames.add(columnName);
+        public Builder select(Column column) {
+            this.selectedColumnNames.add(column);
+            return this;
+        }
+
+        public Builder where(WhereClause clause) {
+            clauseBuilder = clauseBuilder.where(clause);
+            return this;
+        }
+
+        public Builder or(WhereClause clause) {
+            clauseBuilder = clauseBuilder.or(clause);
+            return this;
+        }
+
+        public Builder and(WhereClause clause) {
+            clauseBuilder = clauseBuilder.and(clause);
             return this;
         }
 
         public String build() throws SqlStatementBuilderException {
-            final String columnsDescription = generateSelectedColumnsDescriptions();
-            final String suffix = String.format("FROM \"%s\"", this.tableName);
-            return String.format("%s %s %s", generateSelectedColumnsDescriptions(), generateWhereStatement(), suffix);
-        }
+            final String columnsDescription = Formatter.createColumnsDescription(selectedColumnNames);
+            final String columnsStatement = selectedColumnNames.isEmpty() ? "*" : columnsDescription;
+            final String whereStatement = Formatter.createWhereStatement(clauseBuilder.build());
 
-        private String generateSelectedColumnsDescriptions() {
-            final String selectedColumnDescriptions = selectedColumnNames.isEmpty() ? "*" : String.join(", ", selectedColumnNames);
-            return String.format("SELECT %s", selectedColumnDescriptions);
-        }
-
-        private String generateWhereStatement() {
-            if (queryParams.isEmpty()) {
-                return "";
+            if (whereStatement.isEmpty()) {
+                final String template = "SELECT %s FROM \"%s\";";
+                return String.format(template, columnsStatement, tableName);
+            } else {
+                final String template = "SELECT %s FROM \"%s\" WHERE %s;";
+                return String.format(template, columnsStatement, tableName, whereStatement);
             }
-
-            final String queryDescription = queryParams.stream()
-                    .map(this::generateDescriptionForColumnValuePair)
-                    .collect(Collectors.joining(","));
-
-            return String.format("WHERE %s", queryDescription);
-        }
-
-        private String generateDescriptionForColumnValuePair(ColumnValuePair pair) {
-            return surroundWithDoubleQuotes(pair.getColumn().getName()) + "=" + surroundWithSingleQuotes(pair.getValue());
-        }
-
-        private String surroundWithDoubleQuotes(String string) {
-            return surroundStringWithDelimiter(string, "\"");
-        }
-
-        private String surroundWithSingleQuotes(String string) {
-            return surroundStringWithDelimiter(string, "'");
-        }
-
-        private String surroundStringWithDelimiter(String string, String delimiter) {
-            return delimiter + string + delimiter;
         }
     }
 }

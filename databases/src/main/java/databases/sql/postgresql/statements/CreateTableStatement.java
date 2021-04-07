@@ -43,19 +43,13 @@ public class CreateTableStatement {
 
         public Optional<String> build() {
             if (this.tableName != null && !this.tableName.isEmpty() && !this.columnList.isEmpty()) {
-                String prefix = String.format("CREATE TABLE \"%s\" (\n%s", this.tableName, this.columnDescriptions());
-                String suffix = "\n);";
-                String statement = prefix + "\n);";
+                final String template = "CREATE TABLE \"%s\" (%s);";
+                final String columnDescription = Formatter.createColumnsDescription(columnList);
+                final String statement = String.format(template, this.tableName, columnDescription);
                 return Optional.of(statement);
             } else {
                 return Optional.empty();
             }
-        }
-
-        private String columnDescriptions() {
-            return this.columnList.stream()
-                    .map(Formatter::createColumnDescription)
-                    .collect(Collectors.joining(",\n"));
         }
     }
 }

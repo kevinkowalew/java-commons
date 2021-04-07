@@ -31,7 +31,7 @@ public class MockDatabaseControllerModule extends AbstractModule {
     @Provides
     public static DatabaseTableSchema getSchema() {
         Set<Column> columnList = Set.of(
-                Column.with("Id", Column.Type.SERIAL_PRIMARY_KEY, true),
+                Column.with("Id", Column.Type.SERIAL_PRIMARY_KEY, false),
                 Column.with("Email", Column.Type.VARCHAR_255, true),
                 Column.with("Salt", Column.Type.VARCHAR_255, true),
                 Column.with("Hashed Password", Column.Type.VARCHAR_255, true)

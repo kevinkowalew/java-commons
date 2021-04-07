@@ -9,7 +9,6 @@ public class DatabaseResponse {
         this.object = builder.object;
     }
 
-
     public Optional<Object> getObject() {
         return Optional.ofNullable(object);
     }

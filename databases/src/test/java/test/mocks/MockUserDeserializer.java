@@ -11,7 +11,7 @@ public class MockUserDeserializer extends DatabaseResponseGenericListDeserialize
     @Override
     public Optional<MockUser> deserializeRow(ResultSet resultSet) {
         try {
-            String id = resultSet.getString(MockColumns.ID.getName());
+            String id = String.valueOf(resultSet.getInt(MockColumns.ID.getName()));
             String email = resultSet.getString(MockColumns.EMAIL.getName());
             String salt = resultSet.getString(MockColumns.SALT.getName());
             String hashedPassword= resultSet.getString(MockColumns.HASHED_PASSWORD.getName());
