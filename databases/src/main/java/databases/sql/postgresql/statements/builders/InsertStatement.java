@@ -3,9 +3,10 @@ package databases.sql.postgresql.statements.builders;
 import databases.core.ColumnValuePair;
 import databases.sql.Column;
 import databases.sql.postgresql.statements.DatabaseTableSchema;
+import databases.sql.postgresql.statements.Formatter;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -21,6 +22,7 @@ public class InsertStatement {
     public static class Builder {
         private DatabaseTableSchema tableSchema;
         private List<ColumnValuePair> columnValuePairs = new ArrayList<>();
+        private List<Column> columnsToReturn = new ArrayList<>();
 
         private Builder(final DatabaseTableSchema tableSchema) {
             this.tableSchema = tableSchema;
@@ -28,6 +30,11 @@ public class InsertStatement {
 
         public Builder insert(String value, Column column) {
             columnValuePairs.add(new ColumnValuePair(column, value));
+            return this;
+        }
+
+        public Builder returning(Column... columns) {
+            columnsToReturn.addAll(Arrays.asList(columns));
             return this;
         }
 
@@ -43,7 +50,18 @@ public class InsertStatement {
             final String prefix = String.format("INSERT into \"%s\"", this.tableSchema.getTableName());
             final String columnsDescription = generateColumnDescriptions();
             final String valuesDescription = generateValuesDescription();
+            final String returningDescription = generateReturningDescription();
             return String.format("%s %s VALUES %s;", prefix, columnsDescription, valuesDescription);
+        }
+
+        private String generateReturningDescription() {
+            if (columnsToReturn.isEmpty()) {
+                return "";
+            }
+
+            final String template = "RETURNING %s";
+            final String columnsDescription = Formatter.createCommaSeparatedColumnsDescription(columnsToReturn);
+            return String.format(template, columnsDescription);
         }
 
         private String generateColumnDescriptions() {

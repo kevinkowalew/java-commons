@@ -2,7 +2,7 @@ package test.integration;
 
 import com.google.inject.Guice;
 import databases.sql.Column;
-import databases.sql.TableController;
+import databases.sql.SqlTableController;
 import databases.sql.postgresql.statements.DeleteStatement;
 import databases.sql.postgresql.statements.WhereClause;
 import databases.sql.postgresql.statements.WhereClauseOperator;
@@ -13,7 +13,6 @@ import org.junit.Test;
 import test.mocks.MockColumns;
 import test.mocks.MockDatabaseControllerModule;
 import test.mocks.MockUser;
-import test.mocks.MockUserDeserializer;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,8 +30,8 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     private static final String MOCK_SALT = "icsfwef91p2;UF!@PUFP!@P";
     private static final String MOCK_HASHED_PASSWORD = "wef 0p1q2q1q;lwelq2jeqwjlqkwjl";
 
-    private static TableController sut = Guice.createInjector(new MockDatabaseControllerModule())
-            .getInstance(TableController.class);
+    private static SqlTableController sut = Guice.createInjector(new MockDatabaseControllerModule())
+            .getInstance(SqlTableController.class);
     private static InsertStatement.Builder VALID_INSERT_STATEMENT_BUILDER = sut.insertStatementBuilder()
             .insert(MOCK_EMAIL_ONE, MockColumns.EMAIL)
             .insert(MOCK_SALT, MockColumns.SALT)
@@ -98,7 +97,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
 
         // Act...
         boolean success = sut.insert(insertBuilder);
-        Optional<List<MockUser>> results = sut.read(selectStatement, new MockUserDeserializer(), MockUser.class);
+        Optional<List<MockUser>> results = sut.read(selectStatement);
 
         // Assert...
         assert (success);
@@ -151,17 +150,9 @@ public class PostgresqlDatabaseControllerIntegrationTests {
 
         // Act...
         boolean insertSuccess = sut.insert(insertBuilder);
-        Optional<List<MockUser>> firstReadResults = sut.read(
-                selectBuilder,
-                new MockUserDeserializer(),
-                MockUser.class
-        );
+        Optional<List<MockUser>> firstReadResults = sut.read(selectBuilder);
         boolean deleteSuccess = sut.delete(deleteBuilder);
-        Optional<List<MockUser>> secondReadResults = sut.read(
-                selectBuilder,
-                new MockUserDeserializer(),
-                MockUser.class
-        );
+        Optional<List<MockUser>> secondReadResults = sut.read(selectBuilder);
 
         // Assert...
         assert(insertSuccess);
@@ -188,17 +179,9 @@ public class PostgresqlDatabaseControllerIntegrationTests {
         // Act...
         dropAndRecreateTable();
         boolean insertSuccess = sut.insert(insertBuilder);
-        Optional<List<MockUser>> firstReadResults = sut.read(
-                sut.selectStatementBuilder(),
-                new MockUserDeserializer(),
-                MockUser.class
-        );
+        Optional<List<MockUser>> firstReadResults = sut.read(sut.selectStatementBuilder());
         boolean updateSuccess = sut.update(updateBuilder);
-        Optional<List<MockUser>> secondReadResults = sut.read(
-                sut.selectStatementBuilder(),
-                new MockUserDeserializer(),
-                MockUser.class
-        );
+        Optional<List<MockUser>> secondReadResults = sut.read(sut.selectStatementBuilder());
 
         // Assert...
         assertEquals(firstReadResults.get().size(), 1);
@@ -229,11 +212,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
                 .or(emailClauseTwo);
 
         // Act...
-        Optional<List<MockUser>> results = sut.read(
-                selectBuilder,
-                new MockUserDeserializer(),
-                MockUser.class
-        );
+        Optional<List<MockUser>> results = sut.read(selectBuilder);
 
         // Assert...
         assert (results.isPresent());
@@ -263,11 +242,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
                 .and(emailClause);
 
         // Act...
-        Optional<List<MockUser>> results = sut.read(
-                selectBuilder,
-                new MockUserDeserializer(),
-                MockUser.class
-        );
+        Optional<List<MockUser>> results = sut.read(selectBuilder);
 
         // Assert...
         assert (results.isPresent());

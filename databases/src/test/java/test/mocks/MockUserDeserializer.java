@@ -1,25 +1,42 @@
 package test.mocks;
 
-import test.DatabaseResponseGenericListDeserializer;
+import databases.core.ResultSetDeserializer;
+import databases.sql.Column;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 
-public class MockUserDeserializer extends DatabaseResponseGenericListDeserializer<MockUser> {
+import static test.mocks.MockColumns.*;
+
+public class MockUserDeserializer extends ResultSetDeserializer<MockUser> {
+
+    public Optional<MockUser> deserializeResultSet(ResultSet resultSet) {
+        Integer id = extractFromResultSet(resultSet, ID, -1);
+        String email = extractFromResultSet(resultSet, EMAIL);
+        String salt = extractFromResultSet(resultSet, SALT);
+        String hashedPassword = extractFromResultSet(resultSet, HASHED_PASSWORD);
+        return Optional.of( new MockUser(id, email, salt, hashedPassword) );
+    }
 
     @Override
-    public Optional<MockUser> deserializeRow(ResultSet resultSet) {
+    public Class<MockUser> getGenericClassReference() {
+        return MockUser.class;
+    }
+
+    public String extractFromResultSet(ResultSet resultSet, Column column) {
         try {
-            String id = String.valueOf(resultSet.getInt(MockColumns.ID.getName()));
-            String email = resultSet.getString(MockColumns.EMAIL.getName());
-            String salt = resultSet.getString(MockColumns.SALT.getName());
-            String hashedPassword= resultSet.getString(MockColumns.HASHED_PASSWORD.getName());
-            MockUser user = new MockUser(id, email, salt, hashedPassword);
-            return Optional.of(user);
+            return resultSet.getString(column.getName());
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            return Optional.empty();
+            return "";
+        }
+    }
+
+    public Integer extractFromResultSet(ResultSet resultSet, Column column, Integer defaultValue) {
+        try {
+            return resultSet.getInt(column.getName());
+        } catch (SQLException throwables) {
+            return defaultValue;
         }
     }
 }

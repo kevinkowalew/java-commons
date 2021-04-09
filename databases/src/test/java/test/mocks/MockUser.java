@@ -1,23 +1,23 @@
 package test.mocks;
 
 public class MockUser {
-    String id;
+    Integer id;
     String email;
     String salt;
     String hashedPassword;
 
-    public MockUser(String id, String name, String salt, String hashedPassword) {
+    public MockUser(Integer id, String name, String salt, String hashedPassword) {
         this.id = id;
         this.email = name;
         this.salt = salt;
         this.hashedPassword = hashedPassword;
     }
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

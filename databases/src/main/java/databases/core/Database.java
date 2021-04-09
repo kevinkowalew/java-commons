@@ -11,12 +11,11 @@ import java.util.Optional;
 /**
  * Dao interface used for dependency inversion with data stores
  */
-public interface Database {
+public interface Database<T> {
     boolean insert(InsertStatement.Builder builder);
+    Optional<List<T>> read(SelectStatement.Builder builder);
 
-    <T> Optional<List<T>> read(SelectStatement.Builder builder, Deserializer deserializer, Class<T> tClass);
-
-    Boolean update(UpdateStatement.Builder updateStatementBuilder);
+    Boolean update(UpdateStatement.Builder builder);
 
     Boolean delete(DeleteStatement.Builder builder);
 }

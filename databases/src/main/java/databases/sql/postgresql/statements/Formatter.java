@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class Formatter {
 
-    public static String createColumnsDescription(List<Column> columns) {
+    public static String createCommaSeparatedColumnsDescription(List<Column> columns) {
         return columns.stream().map(Formatter::createColumnDescription).collect(Collectors.joining(", "));
     }
 

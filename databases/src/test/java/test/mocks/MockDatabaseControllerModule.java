@@ -2,7 +2,10 @@ package test.mocks;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
 import commons.utils.YamlDeserializer;
+import databases.core.Deserializer;
+import databases.core.ResultSetDeserializer;
 import databases.sql.Column;
 import databases.sql.SqlExecutor;
 import databases.sql.postgresql.PostgresqlConnection;
@@ -38,6 +41,11 @@ public class MockDatabaseControllerModule extends AbstractModule {
         );
 
         return new DatabaseTableSchema("Users", columnList);
+    }
+
+    @Provides
+    public static Deserializer getDeserializer() {
+        return new MockUserDeserializer();
     }
 
     @Override

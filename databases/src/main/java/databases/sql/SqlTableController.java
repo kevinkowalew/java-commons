@@ -1,16 +1,13 @@
 package databases.sql;
 
 import com.google.inject.Inject;
-import databases.core.ColumnValuePair;
-import databases.core.Database;
-import databases.core.DatabaseResponse;
-import databases.core.Deserializer;
+import com.google.inject.Injector;
+import databases.core.*;
 import databases.sql.postgresql.deserializers.TableExistsDeserializer;
 import databases.sql.postgresql.statements.*;
 import databases.sql.postgresql.statements.builders.InsertStatement;
 import databases.sql.postgresql.statements.builders.SelectStatement;
 import databases.sql.postgresql.statements.builders.UpdateStatement;
-import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,17 +17,16 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * Base class for concrete sql data access implementations to subclass
+ * Base class for concrete SQL CRUD implementations to share logic
  */
-public class TableController implements Database {
+public class SqlTableController<T> implements Database<T> {
     @Inject
     private SqlExecutor executor;
 
     @Inject
     private DatabaseTableSchema schema;
 
-    @Inject
-    private Logger logger;
+    private Deserializer deserializer;
 
     public boolean createTable() {
         final Optional<String> statement = CreateTableStatement.create(schema);
@@ -94,10 +90,10 @@ public class TableController implements Database {
     }
 
     @Override
-    public <T> Optional<List<T>> read(SelectStatement.Builder builder, Deserializer deserializer, Class<T> tClass) {
+    public Optional<List<T>> read(SelectStatement.Builder builder) {
         try {
             final String query = builder.build();
-            return executeQueryWithListReturnValue(query, deserializer, tClass);
+            return executeQueryWithListReturnValue(query, deserializer);
         } catch (Exception e) {
             // TODO: Add logging here
             return Optional.empty();
@@ -136,7 +132,7 @@ public class TableController implements Database {
         }
     }
 
-    private <T> Optional<List<T>> executeQueryWithListReturnValue(final String query, final Deserializer deserializer, final Class<T> tClass) {
+    private Optional<List<T>> executeQueryWithListReturnValue(final String query, final Deserializer deserializer) {
         try {
             Optional<List> response = executor.executeQuery(query, deserializer).getCastedObject(List.class);
 
@@ -147,12 +143,7 @@ public class TableController implements Database {
             final List<T> returnValue = new ArrayList<>(response.get().size());
 
             for (Object object : response.get()) {
-                if (!tClass.isInstance(object)) {
-                    // TODO: add logging here
-                    continue;
-                } else {
-                    returnValue.add(tClass.cast(object));
-                }
+                returnValue.add((T) deserializer.deserialize(object));
             }
 
             return Optional.of(returnValue);

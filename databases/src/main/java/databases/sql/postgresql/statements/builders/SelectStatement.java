@@ -48,7 +48,7 @@ public class SelectStatement {
         }
 
         public String build() throws SqlStatementBuilderException {
-            final String columnsDescription = Formatter.createColumnsDescription(selectedColumnNames);
+            final String columnsDescription = Formatter.createCommaSeparatedColumnsDescription(selectedColumnNames);
             final String columnsStatement = selectedColumnNames.isEmpty() ? "*" : columnsDescription;
             final String whereStatement = Formatter.createWhereStatement(clauseBuilder.build());
 

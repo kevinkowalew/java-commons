@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class CreateTableStatement {
     public CreateTableStatement() {
@@ -44,7 +43,7 @@ public class CreateTableStatement {
         public Optional<String> build() {
             if (this.tableName != null && !this.tableName.isEmpty() && !this.columnList.isEmpty()) {
                 final String template = "CREATE TABLE \"%s\" (%s);";
-                final String columnDescription = Formatter.createColumnsDescription(columnList);
+                final String columnDescription = Formatter.createCommaSeparatedColumnsDescription(columnList);
                 final String statement = String.format(template, this.tableName, columnDescription);
                 return Optional.of(statement);
             } else {
