@@ -143,7 +143,7 @@ public class SqlTableController<T> implements Database<T> {
                return Optional.of((List<T>) response.get());
            } else {
                // TODO: add logging here
-               return Optional.empty()
+               return Optional.empty();
            }
 
 
