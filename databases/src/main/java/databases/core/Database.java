@@ -13,6 +13,7 @@ import java.util.Optional;
  */
 public interface Database<T> {
     boolean insert(InsertStatement.Builder builder);
+
     Optional<List<T>> read(SelectStatement.Builder builder);
 
     Boolean update(UpdateStatement.Builder builder);
