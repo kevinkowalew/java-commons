@@ -17,7 +17,8 @@ public abstract class ResultSetDeserializer<T> implements Deserializer {
 
             try {
                 while (resultSet.next()) {
-                    deserializeResultSet(resultSet).ifPresent(returnValue::add);
+                    Optional<T> results = deserializeResultSet(resultSet);
+                    results.ifPresent(returnValue::add);
                 }
 
                 return returnValue;

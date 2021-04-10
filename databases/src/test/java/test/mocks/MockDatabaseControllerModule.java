@@ -1,13 +1,11 @@
 package test.mocks;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.TypeLiteral;
+import com.google.inject.*;
 import commons.utils.YamlDeserializer;
-import databases.core.Deserializer;
 import databases.core.ResultSetDeserializer;
 import databases.sql.Column;
 import databases.sql.SqlExecutor;
+import databases.sql.SqlTableController;
 import databases.sql.postgresql.PostgresqlConnection;
 import databases.sql.postgresql.configuration.PostgresqlDeploymentConfiguration;
 import databases.sql.postgresql.configuration.adapters.PostgresqlConfigurationToPostgresqlConnection;
@@ -43,9 +41,11 @@ public class MockDatabaseControllerModule extends AbstractModule {
         return new DatabaseTableSchema("Users", columnList);
     }
 
-    @Provides
-    public static Deserializer getDeserializer() {
-        return new MockUserDeserializer();
+    public static SqlTableController<MockUser> createController() {
+        Injector injector = Guice.createInjector(new MockDatabaseControllerModule());
+        final SqlTableController controller =  injector.getInstance(SqlTableController.class);
+        controller.setDeserializer(new MockUserDeserializer());
+        return controller;
     }
 
     @Override

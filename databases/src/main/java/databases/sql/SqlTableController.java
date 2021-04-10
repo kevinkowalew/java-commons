@@ -1,7 +1,6 @@
 package databases.sql;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import databases.core.*;
 import databases.sql.postgresql.deserializers.TableExistsDeserializer;
 import databases.sql.postgresql.statements.*;
@@ -26,7 +25,7 @@ public class SqlTableController<T> implements Database<T> {
     @Inject
     private DatabaseTableSchema schema;
 
-    private Deserializer deserializer;
+    private ResultSetDeserializer<T> deserializer;
 
     public boolean createTable() {
         final Optional<String> statement = CreateTableStatement.create(schema);
@@ -132,7 +131,7 @@ public class SqlTableController<T> implements Database<T> {
         }
     }
 
-    private Optional<List<T>> executeQueryWithListReturnValue(final String query, final Deserializer deserializer) {
+    private Optional<List<T>> executeQueryWithListReturnValue(final String query, final ResultSetDeserializer<T> deserializer) {
         try {
             Optional<List> response = executor.executeQuery(query, deserializer).getCastedObject(List.class);
 
@@ -140,13 +139,15 @@ public class SqlTableController<T> implements Database<T> {
                 return Optional.empty();
             }
 
-            final List<T> returnValue = new ArrayList<>(response.get().size());
+           if(response.get().stream().allMatch(o -> deserializer.getGenericClassReference().isInstance(o))) {
+               return Optional.of((List<T>) response.get());
+           } else {
+               // TODO: add logging here
+               return Optional.empty()
+           }
 
-            for (Object object : response.get()) {
-                returnValue.add((T) deserializer.deserialize(object));
-            }
 
-            return Optional.of(returnValue);
+
         } catch (Exception e) {
             // TODO: add logging here
             return Optional.empty();
@@ -160,5 +161,9 @@ public class SqlTableController<T> implements Database<T> {
         return schema.getColumns().stream()
                 .filter(Column::isRequired)
                 .anyMatch(Predicate.not(insertBuilderRequestsColumns::contains));
+    }
+
+    public void setDeserializer(ResultSetDeserializer<T> deserializer) {
+        this.deserializer = deserializer;
     }
 }

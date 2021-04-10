@@ -21,17 +21,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 public class PostgresqlDatabaseControllerIntegrationTests {
-    private static final String MOCK_ID_ONE = "1";
+    private static final Integer MOCK_ID_ONE = 1;
     private static final String MOCK_EMAIL_ONE = "john.doe@gmail.com";
 
-    private static final String MOCK_ID_TWO = "2";
+    private static final Integer MOCK_ID_TWO = 2;
     private static final String MOCK_EMAIL_TWO = "jane.doe@gmail.com";
 
     private static final String MOCK_SALT = "icsfwef91p2;UF!@PUFP!@P";
     private static final String MOCK_HASHED_PASSWORD = "wef 0p1q2q1q;lwelq2jeqwjlqkwjl";
 
-    private static SqlTableController sut = Guice.createInjector(new MockDatabaseControllerModule())
-            .getInstance(SqlTableController.class);
+    private static SqlTableController sut = MockDatabaseControllerModule.createController();
     private static InsertStatement.Builder VALID_INSERT_STATEMENT_BUILDER = sut.insertStatementBuilder()
             .insert(MOCK_EMAIL_ONE, MockColumns.EMAIL)
             .insert(MOCK_SALT, MockColumns.SALT)
