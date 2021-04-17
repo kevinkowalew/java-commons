@@ -4,7 +4,7 @@
   <groupId>com.development.kowalewski</groupId>
   <artifactId>java-miscellany</artifactId>
   <packaging>pom</packaging>
-  <version>0.0.28</version>
+  <version>0.0.29-SNAPSHOT</version>
 
   <modules>
     <module>commons</module>
