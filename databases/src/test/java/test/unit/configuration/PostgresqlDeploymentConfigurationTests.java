@@ -46,7 +46,7 @@ public class PostgresqlDeploymentConfigurationTests {
         Optional<PostgresqlDeploymentConfiguration> configuration = YamlDeserializer.deserializeFromFile(file, PostgresqlDeploymentConfiguration.class);
 
         // Assert
-        assertEquals("172.18.0.2", configuration.get().getPostgresqlConfiguration().getHost());
+        assertEquals("172.19.0.3", configuration.get().getPostgresqlConfiguration().getHost());
         assertEquals(5432, configuration.get().getPostgresqlConfiguration().getPort());
         assertEquals("admin", configuration.get().getPostgresqlConfiguration().getUser());
         assertEquals("password", configuration.get().getPostgresqlConfiguration().getPassword());

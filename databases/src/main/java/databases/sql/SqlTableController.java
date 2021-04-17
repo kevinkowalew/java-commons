@@ -8,7 +8,6 @@ import databases.sql.postgresql.statements.builders.InsertStatement;
 import databases.sql.postgresql.statements.builders.SelectStatement;
 import databases.sql.postgresql.statements.builders.UpdateStatement;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -28,6 +27,7 @@ public class SqlTableController<T> implements Database<T> {
     private ResultSetDeserializer<T> deserializer;
 
     public boolean createTable() {
+        // TODO: add schema-defined permission to selectively allow this functionality
         final Optional<String> statement = CreateTableStatement.create(schema);
 
         if (statement.isEmpty()) {
@@ -39,6 +39,7 @@ public class SqlTableController<T> implements Database<T> {
     }
 
     public boolean dropTable() {
+        // TODO: add schema-defined permission to selectively allow this functionality
         final String statement = DropTableStatement.create(schema.getTableName());
         return executeUpdateWithBooleanReturnValue(statement, new SQLUpdateDeserializer());
     }
@@ -72,19 +73,24 @@ public class SqlTableController<T> implements Database<T> {
     }
 
     @Override
-    public boolean insert(InsertStatement.Builder builder) {
+    public Optional<T> insert(InsertStatement.Builder builder) {
         try {
-            if (insertBuilderIsMissingRequiredFields(builder)) {
-                // TODO: Add logging here
-                return false;
-            }
+                final String update = builder.build();
+                final DatabaseResponse response = executor.executeUpdate(update, deserializer);
+                final List insertedObjectList = response.getCastedObjectOrDefault(List.class, List.of());
+                Class<T> tClass = deserializer.getGenericClassReference();
 
-            final String statement = builder.build();
-            return executeUpdateWithBooleanReturnValue(statement, new SQLUpdateDeserializer());
+                return insertedObjectList.stream()
+                        .filter(tClass::isInstance)
+                        .map(tClass::cast)
+                        .findFirst();
         } catch (InsertStatement.Builder.Exception e) {
             // TODO: Add logging here
             e.printStackTrace();
-            return false;
+            return Optional.empty();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Optional.empty();
         }
     }
 
@@ -139,15 +145,12 @@ public class SqlTableController<T> implements Database<T> {
                 return Optional.empty();
             }
 
-           if(response.get().stream().allMatch(o -> deserializer.getGenericClassReference().isInstance(o))) {
-               return Optional.of((List<T>) response.get());
-           } else {
-               // TODO: add logging here
-               return Optional.empty();
-           }
-
-
-
+            final Class<T> tClass = deserializer.getGenericClassReference();
+            final List<T> castedObjectList = (List<T>) response.get().stream()
+                    .filter(tClass::isInstance)
+                    .map(tClass::cast)
+                    .collect(Collectors.toList());
+            return Optional.of(castedObjectList);
         } catch (Exception e) {
             // TODO: add logging here
             return Optional.empty();

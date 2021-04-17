@@ -12,7 +12,7 @@ import java.util.Optional;
  * Dao interface used for dependency inversion with data stores
  */
 public interface Database<T> {
-    boolean insert(InsertStatement.Builder builder);
+    Optional<T> insert(InsertStatement.Builder builder);
 
     Optional<List<T>> read(SelectStatement.Builder builder);
 

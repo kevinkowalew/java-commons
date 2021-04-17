@@ -21,6 +21,14 @@ public class DatabaseResponse {
         }
     }
 
+    public <T> T getCastedObjectOrDefault(Class<T> tClass, T defaultValue) {
+        if (!tClass.isInstance(object)) {
+            return defaultValue;
+        } else {
+            return tClass.cast(object);
+        }
+    }
+
     public static Builder newBuilder() {
         return new Builder();
     }

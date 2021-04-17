@@ -39,29 +39,34 @@ public class InsertStatement {
         }
 
         public String build() throws Exception {
-            return String.format("%s", generateInsertStatement());
+            final String tableName = surroundWithDoubleQuotes(tableSchema.getTableName());
+            final String prefix = String.format("INSERT into %s", tableName);
+            final String columnsDescription = generateColumnDescriptions();
+            final String valuesDescription = generateValuesDescription();
+            final String returningDescription = generateReturningDescription();
+            return String.format("%s %s VALUES %s %s;", prefix, columnsDescription, valuesDescription, returningDescription);
         }
 
         public List<ColumnValuePair> getColumnValuePairs() {
             return columnValuePairs;
         }
 
-        private String generateInsertStatement() {
-            final String prefix = String.format("INSERT into \"%s\"", this.tableSchema.getTableName());
-            final String columnsDescription = generateColumnDescriptions();
-            final String valuesDescription = generateValuesDescription();
-            final String returningDescription = generateReturningDescription();
-            return String.format("%s %s VALUES %s;", prefix, columnsDescription, valuesDescription);
+        private String generateReturningDescription() {
+            final String template = "RETURNING %s";
+            final List<Column> columns = getColumnsToReturnOrDefaultToAllColumns();
+
+            final String columnsDescription = columns.stream()
+                    .map(Column::getName)
+                    .collect(Collectors.joining(", "));
+            return String.format(template, columnsDescription);
         }
 
-        private String generateReturningDescription() {
-            if (columnsToReturn.isEmpty()) {
-                return "";
+        private List<Column> getColumnsToReturnOrDefaultToAllColumns() {
+            if (!columnsToReturn.isEmpty()) {
+                return columnsToReturn;
+            } else {
+                return new ArrayList<>(tableSchema.getColumns());
             }
-
-            final String template = "RETURNING %s";
-            final String columnsDescription = Formatter.createCommaSeparatedColumnsDescription(columnsToReturn);
-            return String.format(template, columnsDescription);
         }
 
         private String generateColumnDescriptions() {
