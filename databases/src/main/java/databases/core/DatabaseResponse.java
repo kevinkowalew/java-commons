@@ -33,10 +33,6 @@ public class DatabaseResponse {
         return new Builder();
     }
 
-    public DatabaseResponse cloneWithUpdatedObject(Object updatedObject) {
-        return new Builder().setObject(updatedObject).build();
-    }
-
     public static class Builder {
         private Object object;
 
