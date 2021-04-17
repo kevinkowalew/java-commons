@@ -74,16 +74,17 @@ public class SqlTableController<T> implements Database<T> {
 
     @Override
     public Optional<T> insert(InsertStatement.Builder builder) {
-        try {
-                final String update = builder.build();
-                final DatabaseResponse response = executor.executeUpdate(update, deserializer);
-                final List insertedObjectList = response.getCastedObjectOrDefault(List.class, List.of());
-                Class<T> tClass = deserializer.getGenericClassReference();
+        if(insertBuilderIsMissingRequiredFields(builder)) {
+            return Optional.empty();
+        }
 
-                return insertedObjectList.stream()
-                        .filter(tClass::isInstance)
-                        .map(tClass::cast)
-                        .findFirst();
+        try {
+            final String statement = builder.build();
+            final DatabaseResponse response = executor.executeQuery(statement, deserializer);
+            return response.getCastedObjectOrDefault(List.class, List.of()).stream()
+                    .filter(deserializer.getGenericClassReference()::isInstance)
+                    .map(deserializer.getGenericClassReference()::cast)
+                    .findFirst();
         } catch (InsertStatement.Builder.Exception e) {
             // TODO: Add logging here
             e.printStackTrace();

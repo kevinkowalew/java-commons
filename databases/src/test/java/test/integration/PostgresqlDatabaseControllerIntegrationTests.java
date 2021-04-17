@@ -16,8 +16,7 @@ import test.mocks.MockUser;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class PostgresqlDatabaseControllerIntegrationTests {
     private static final Integer MOCK_ID_ONE = 1;
@@ -29,7 +28,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     private static final String MOCK_SALT = "icsfwef91p2;UF!@PUFP!@P";
     private static final String MOCK_HASHED_PASSWORD = "wef 0p1q2q1q;lwelq2jeqwjlqkwjl";
 
-    private static SqlTableController sut = MockDatabaseControllerModule.createController();
+    private static SqlTableController<MockUser> sut = MockDatabaseControllerModule.createController();
     private static InsertStatement.Builder VALID_INSERT_STATEMENT_BUILDER = sut.insertStatementBuilder()
             .insert(MOCK_EMAIL_ONE, MockColumns.EMAIL)
             .insert(MOCK_SALT, MockColumns.SALT)
@@ -89,8 +88,10 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     @Test
     public void test_Insert_SunnyDay() {
         // Arrange...
-        final InsertStatement.Builder insertBuilder = VALID_INSERT_STATEMENT_BUILDER
-                .returning(MockColumns.ID);
+        final InsertStatement.Builder insertBuilder = sut.insertStatementBuilder()
+                .insert(MOCK_EMAIL_ONE, MockColumns.EMAIL)
+                .insert(MOCK_SALT, MockColumns.SALT)
+                .insert(MOCK_HASHED_PASSWORD, MockColumns.HASHED_PASSWORD);
         dropAndRecreateTable();
 
         // Act...
@@ -102,6 +103,28 @@ public class PostgresqlDatabaseControllerIntegrationTests {
         assertEquals(MOCK_EMAIL_ONE, user.get().getEmail());
         assertEquals(MOCK_SALT, user.get().getSalt());
         assertEquals(MOCK_HASHED_PASSWORD, user.get().getHashedPassword());
+    }
+
+
+    @Test
+    public void test_Insert_SunnyDay_Return_SpecificValues() {
+        // Arrange...
+        final InsertStatement.Builder insertBuilder = sut.insertStatementBuilder()
+                .insert(MOCK_EMAIL_ONE, MockColumns.EMAIL)
+                .insert(MOCK_SALT, MockColumns.SALT)
+                .insert(MOCK_HASHED_PASSWORD, MockColumns.HASHED_PASSWORD)
+                .returning(MockColumns.ID, MockColumns.EMAIL);
+        dropAndRecreateTable();
+
+        // Act...
+        Optional<MockUser> user = sut.insert(insertBuilder);
+
+        // Assert...
+        assert (user.isPresent());
+        assertEquals(MOCK_ID_ONE, user.get().getId());
+        assertEquals(MOCK_EMAIL_ONE, user.get().getEmail());
+        assertEquals("", user.get().getSalt());
+        assertEquals("", user.get().getHashedPassword());
     }
 
     @Test
@@ -150,7 +173,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
         Optional<List<MockUser>> secondReadResults = sut.read(selectBuilder);
 
         // Assert...
-        assert(insertSuccess);
+        assert (insertSuccess);
         assert (firstReadResults.isPresent());
         assertEquals(firstReadResults.get().size(), 1);
         assert (deleteSuccess);

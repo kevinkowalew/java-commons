@@ -52,21 +52,16 @@ public class InsertStatement {
         }
 
         private String generateReturningDescription() {
-            final String template = "RETURNING %s";
-            final List<Column> columns = getColumnsToReturnOrDefaultToAllColumns();
+            if (columnsToReturn.isEmpty()) {
+                return "RETURNING *";
+            }
 
+            final String template = "RETURNING %s";
+            final List<Column> columns = columnsToReturn;
             final String columnsDescription = columns.stream()
                     .map(Column::getName)
                     .collect(Collectors.joining(", "));
             return String.format(template, columnsDescription);
-        }
-
-        private List<Column> getColumnsToReturnOrDefaultToAllColumns() {
-            if (!columnsToReturn.isEmpty()) {
-                return columnsToReturn;
-            } else {
-                return new ArrayList<>(tableSchema.getColumns());
-            }
         }
 
         private String generateColumnDescriptions() {
