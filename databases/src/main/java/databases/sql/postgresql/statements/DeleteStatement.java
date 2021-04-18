@@ -51,6 +51,7 @@ public class DeleteStatement {
             } else {
                 String initialValueDescription = Formatter.createWhereClauseDescription(this.initialClause);
                 String prefix = String.format("DELETE FROM \"%s\" WHERE %s", this.tableName, initialValueDescription);
+
                 if (this.trailingClauses.isEmpty()) {
                     return String.format("%s;", prefix);
                 } else {

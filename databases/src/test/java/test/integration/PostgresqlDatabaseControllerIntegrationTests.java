@@ -16,7 +16,10 @@ import test.mocks.MockUser;
 import java.util.List;
 import java.util.Optional;
 
+import static databases.sql.postgresql.statements.WhereClauseOperator.EQUALS;
 import static org.junit.Assert.*;
+import static test.mocks.MockColumns.EMAIL;
+import static test.mocks.MockColumns.ID;
 
 public class PostgresqlDatabaseControllerIntegrationTests {
     private static final Integer MOCK_ID_ONE = 1;
@@ -30,7 +33,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
 
     private static SqlTableController<MockUser> sut = MockDatabaseControllerModule.createController();
     private static InsertStatement.Builder VALID_INSERT_STATEMENT_BUILDER = sut.insertStatementBuilder()
-            .insert(MOCK_EMAIL_ONE, MockColumns.EMAIL)
+            .insert(MOCK_EMAIL_ONE, EMAIL)
             .insert(MOCK_SALT, MockColumns.SALT)
             .insert(MOCK_HASHED_PASSWORD, MockColumns.HASHED_PASSWORD);
 
@@ -89,7 +92,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     public void test_Insert_SunnyDay() {
         // Arrange...
         final InsertStatement.Builder insertBuilder = sut.insertStatementBuilder()
-                .insert(MOCK_EMAIL_ONE, MockColumns.EMAIL)
+                .insert(MOCK_EMAIL_ONE, EMAIL)
                 .insert(MOCK_SALT, MockColumns.SALT)
                 .insert(MOCK_HASHED_PASSWORD, MockColumns.HASHED_PASSWORD);
         dropAndRecreateTable();
@@ -110,10 +113,10 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     public void test_Insert_SunnyDay_Return_SpecificValues() {
         // Arrange...
         final InsertStatement.Builder insertBuilder = sut.insertStatementBuilder()
-                .insert(MOCK_EMAIL_ONE, MockColumns.EMAIL)
+                .insert(MOCK_EMAIL_ONE, EMAIL)
                 .insert(MOCK_SALT, MockColumns.SALT)
                 .insert(MOCK_HASHED_PASSWORD, MockColumns.HASHED_PASSWORD)
-                .returning(MockColumns.ID, MockColumns.EMAIL);
+                .returning(ID, EMAIL);
         dropAndRecreateTable();
 
         // Act...
@@ -131,8 +134,8 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     public void test_Insert_RainyDay_MissingValues() {
         // Arrange...
         final InsertStatement.Builder insertBuilder = sut.insertStatementBuilder()
-                .insert("154321", MockColumns.ID)
-                .insert("john.doe@gmail.com", MockColumns.EMAIL)
+                .insert("154321", ID)
+                .insert("john.doe@gmail.com", EMAIL)
                 .insert("icsfwef91p2;UF!@PUFP!@P", MockColumns.SALT);
         final SelectStatement.Builder selectStatement = sut.selectStatementBuilder();
 
@@ -162,7 +165,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     public void test_Delete_SunnyDay() {
         // Arrange...
         final InsertStatement.Builder insertBuilder = VALID_INSERT_STATEMENT_BUILDER;
-        final WhereClause clause = new WhereClause(MockColumns.ID, MOCK_ID_ONE, WhereClauseOperator.EQUALS);
+        final WhereClause clause = new WhereClause(ID, EQUALS, MOCK_ID_ONE);
         final SelectStatement.Builder selectBuilder = sut.selectStatementBuilder().where(clause);
         final DeleteStatement.Builder deleteBuilder = sut.deleteStatementBuilder().where(clause);
 
@@ -187,10 +190,9 @@ public class PostgresqlDatabaseControllerIntegrationTests {
         final String updatedSalt = "my new salt";
         final String updatedHashedPassword = "my new hashed password";
         final InsertStatement.Builder insertBuilder = VALID_INSERT_STATEMENT_BUILDER;
-        final WhereClause clause = new WhereClause(MockColumns.ID, MOCK_ID_ONE, WhereClauseOperator.EQUALS);
         final UpdateStatement.Builder updateBuilder = sut.updateStatementBuilder()
-                .where(clause)
-                .update(MOCK_EMAIL_TWO, MockColumns.EMAIL)
+                .where(ID, EQUALS, MOCK_ID_ONE)
+                .update(MOCK_EMAIL_TWO, EMAIL)
                 .update(updatedSalt, MockColumns.SALT)
                 .update(updatedHashedPassword, MockColumns.HASHED_PASSWORD);
 
@@ -223,11 +225,9 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     public void test_Read_WhereClause_OR_Handling() {
         // Arrange...
         insertTwoMockUsers();
-        final WhereClause emailClauseOne = new WhereClause(MockColumns.EMAIL, MOCK_EMAIL_ONE, WhereClauseOperator.EQUALS);
-        final WhereClause emailClauseTwo = new WhereClause(MockColumns.EMAIL, MOCK_EMAIL_TWO, WhereClauseOperator.EQUALS);
         final SelectStatement.Builder selectBuilder = sut.selectStatementBuilder()
-                .where(emailClauseOne)
-                .or(emailClauseTwo);
+                .where(EMAIL, EQUALS, MOCK_EMAIL_ONE)
+                .or(EMAIL, EQUALS, MOCK_EMAIL_TWO);
 
         // Act...
         Optional<List<MockUser>> results = sut.read(selectBuilder);
@@ -253,11 +253,9 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     public void test_Read_WhereClause_AND_Handling() {
         // Arrange...
         insertTwoMockUsers();
-        final WhereClause idClause = new WhereClause(MockColumns.ID, "2", WhereClauseOperator.EQUALS);
-        final WhereClause emailClause = new WhereClause(MockColumns.EMAIL, "jane.doe@gmail.com", WhereClauseOperator.EQUALS);
         final SelectStatement.Builder selectBuilder = sut.selectStatementBuilder()
-                .where(idClause)
-                .and(emailClause);
+                .where(ID, EQUALS, "2")
+                .and(EMAIL, EQUALS, "jane.doe@gmail.com");
 
         // Act...
         Optional<List<MockUser>> results = sut.read(selectBuilder);
@@ -275,11 +273,11 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     private void insertTwoMockUsers() {
         dropAndRecreateTable();
         final InsertStatement.Builder firstInsert = sut.insertStatementBuilder()
-                .insert("john.doe@gmail.com", MockColumns.EMAIL)
+                .insert("john.doe@gmail.com", EMAIL)
                 .insert(MOCK_SALT, MockColumns.SALT)
                 .insert(MOCK_HASHED_PASSWORD, MockColumns.HASHED_PASSWORD);
         final InsertStatement.Builder secondInsert = sut.insertStatementBuilder()
-                .insert("jane.doe@gmail.com", MockColumns.EMAIL)
+                .insert("jane.doe@gmail.com", EMAIL)
                 .insert(MOCK_SALT, MockColumns.SALT)
                 .insert(MOCK_HASHED_PASSWORD, MockColumns.HASHED_PASSWORD);
         assert (sut.insert(firstInsert).isPresent());

@@ -5,6 +5,7 @@ import databases.sql.SqlStatementBuilderException;
 import databases.sql.postgresql.statements.DatabaseTableSchema;
 import databases.sql.postgresql.statements.Formatter;
 import databases.sql.postgresql.statements.WhereClause;
+import databases.sql.postgresql.statements.WhereClauseOperator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,14 +38,29 @@ public class SelectStatement {
             return this;
         }
 
+        public Builder where(Column column, WhereClauseOperator operator, Object value) {
+            final WhereClause clause = new WhereClause(column, operator, value);
+            return where(clause);
+        }
+
         public Builder or(WhereClause clause) {
             clauseBuilder = clauseBuilder.or(clause);
             return this;
         }
 
+        public Builder or(Column column, WhereClauseOperator operator, Object value) {
+            final WhereClause clause = new WhereClause(column, operator, value);
+            return or(clause);
+        }
+
         public Builder and(WhereClause clause) {
             clauseBuilder = clauseBuilder.and(clause);
             return this;
+        }
+
+        public Builder and(Column column, WhereClauseOperator operator, Object value) {
+            final WhereClause clause = new WhereClause(column, operator, value);
+            return where(clause);
         }
 
         public String build() throws SqlStatementBuilderException {

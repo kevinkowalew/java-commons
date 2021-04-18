@@ -27,14 +27,30 @@ public class UpdateStatement {
             return this;
         }
 
+        public Builder where(Column column, WhereClauseOperator operator, Object value) {
+            final WhereClause clause = new WhereClause(column, operator, value);
+            return where(clause);
+        }
+
         public Builder and(WhereClause clause) {
             whereClauseBuilder = whereClauseBuilder.and(clause);
             return this;
         }
 
+        public Builder and(Column column, WhereClauseOperator operator, Object value) {
+            final WhereClause clause = new WhereClause(column, operator, value);
+            return and(clause);
+        }
+
         public Builder or(WhereClause clause) {
             whereClauseBuilder = whereClauseBuilder.or(clause);
             return this;
+        }
+
+
+        public Builder or(Column column, WhereClauseOperator operator, Object value) {
+            final WhereClause clause = new WhereClause(column, operator, value);
+            return or(clause);
         }
 
         public Builder update(String value, Column column) {
