@@ -1,5 +1,8 @@
 package databases.sql;
 
+
+import databases.sql.postgresql.statements.ColumnReference;
+
 import java.util.Objects;
 
 public class Column {
@@ -29,6 +32,10 @@ public class Column {
         return required;
     }
 
+    public ColumnReference getReferenceInTable(String tableName) {
+        return new ColumnReference(tableName, this);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -44,7 +51,8 @@ public class Column {
 
     public enum Type {
         SERIAL_PRIMARY_KEY,
-        VARCHAR_255;
+        VARCHAR_255,
+        FOREIGN_KEY;
 
         Type() {
         }

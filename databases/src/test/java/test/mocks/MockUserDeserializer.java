@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 
-import static test.mocks.MockColumns.*;
+import static test.mocks.MockUsersColumn.*;
 
 public class MockUserDeserializer extends ResultSetDeserializer<MockUser> {
 

@@ -14,7 +14,7 @@ import docker.fields.Port;
 import docker.fields.Volume;
 import docker.fields.enums.Restart;
 import org.junit.Test;
-import test.mocks.MockDatabaseControllerModule;
+import test.mocks.AbstractMockDatabaseControllerModule;
 
 import java.io.IOException;
 
@@ -25,7 +25,7 @@ public class PostgresqlDeploymentConfigurationToDeploymentTests {
     @Test
     public void testConfigurationToDockerDeployment() throws IOException {
         // Arrange..
-        PostgresqlDeploymentConfiguration mockConfiguration = MockDatabaseControllerModule.getMockConfiguration();
+        PostgresqlDeploymentConfiguration mockConfiguration = AbstractMockDatabaseControllerModule.getMockConfiguration();
 
         // Act..
         PostgresqlConfigurationToDeployment deployment = new PostgresqlConfigurationToDeployment(mockConfiguration);

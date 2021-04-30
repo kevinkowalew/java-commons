@@ -9,7 +9,20 @@ import java.util.stream.Collectors;
 
 public class Formatter {
 
-    public static String createCommaSeparatedColumnsDescription(List<Column> columns) {
+    public static String createColumnReferencesDescription(List<ColumnReference> columnReferences) {
+        return columnReferences.stream()
+                .map(Formatter::createColumnReferenceDescription)
+                .collect(Collectors.joining(","));
+    }
+
+    public static String createColumnReferenceDescription(ColumnReference columnReference) {
+        return joinWithSeparator(
+                columnReference.getParentTableName(),
+                columnReference.getColumn().getName(),
+                ".");
+    }
+
+    public static String createColumnsDescription(List<Column> columns) {
         return columns.stream().map(Formatter::createColumnDescription).collect(Collectors.joining(", "));
     }
 
@@ -21,7 +34,11 @@ public class Formatter {
     }
 
     private static String joinWithSpace(String prefix, String suffix) {
-        return String.format("%s %s", prefix, suffix);
+        return joinWithSeparator(prefix, suffix, " ");
+    }
+
+    private static String joinWithSeparator(String prefix, String suffix, String separator) {
+        return String.format("%s%s%s", prefix, separator, suffix);
     }
 
     private static String surroundString(String string, String surroundingString) {
@@ -29,7 +46,9 @@ public class Formatter {
     }
 
     private static String createColumnTypeDescription(Column.Type type) {
-        switch(type) {
+        switch (type) {
+            case FOREIGN_KEY:
+                return "FOREIGN KEY";
             case SERIAL_PRIMARY_KEY:
                 return "SERIAL PRIMARY KEY";
             case VARCHAR_255:
@@ -43,6 +62,7 @@ public class Formatter {
         final String valueDescription = createValueDescription(clause.getValue());
         return String.format("\"%s\" %s %s", clause.getColumn().getName(), clause.getOperator().get(), valueDescription);
     }
+
     public static String createOperatorWhereClauseDescription(Pair<LogicalOperator, WhereClause> operatorWhereClausePair) {
         final String whereClauseDescription = createWhereClauseDescription(operatorWhereClausePair.getValue());
         return String.format("%s %s", operatorWhereClausePair.getKey(), whereClauseDescription);
@@ -51,6 +71,7 @@ public class Formatter {
     private static String createValueDescription(Object value) {
         return value instanceof String ? String.format("'%s'", value) : value.toString();
     }
+
     public static String createWhereStatement(CompoundClause clause) {
         if (clause.getLeadingClause() == null) {
             return "";

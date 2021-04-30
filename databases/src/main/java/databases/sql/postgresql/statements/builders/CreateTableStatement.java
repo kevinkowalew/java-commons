@@ -1,6 +1,8 @@
-package databases.sql.postgresql.statements;
+package databases.sql.postgresql.statements.builders;
 
 import databases.sql.Column;
+import databases.sql.postgresql.statements.DatabaseTableSchema;
+import databases.sql.postgresql.statements.Formatter;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -43,7 +45,7 @@ public class CreateTableStatement {
         public Optional<String> build() {
             if (this.tableName != null && !this.tableName.isEmpty() && !this.columnList.isEmpty()) {
                 final String template = "CREATE TABLE \"%s\" (%s);";
-                final String columnDescription = Formatter.createCommaSeparatedColumnsDescription(columnList);
+                final String columnDescription = Formatter.createColumnsDescription(columnList);
                 final String statement = String.format(template, this.tableName, columnDescription);
                 return Optional.of(statement);
             } else {

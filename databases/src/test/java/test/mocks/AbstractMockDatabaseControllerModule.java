@@ -1,9 +1,12 @@
 package test.mocks;
 
-import com.google.inject.*;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Provides;
 import commons.utils.YamlDeserializer;
 import databases.core.ResultSetDeserializer;
-import databases.sql.Column;
 import databases.sql.SqlExecutor;
 import databases.sql.SqlTableController;
 import databases.sql.postgresql.PostgresqlConnection;
@@ -12,9 +15,7 @@ import databases.sql.postgresql.configuration.adapters.PostgresqlConfigurationTo
 import databases.sql.postgresql.executors.PostgresqlExecutor;
 import databases.sql.postgresql.statements.DatabaseTableSchema;
 
-import java.util.Set;
-
-public class MockDatabaseControllerModule extends AbstractModule {
+public abstract class AbstractMockDatabaseControllerModule extends AbstractModule {
     public static PostgresqlDeploymentConfiguration getMockConfiguration() {
         final String resourceName = "mock-postgresql-config.yml";
         return (PostgresqlDeploymentConfiguration) YamlDeserializer.deserializeFromResource(resourceName, PostgresqlDeploymentConfiguration.class).get();
@@ -25,28 +26,12 @@ public class MockDatabaseControllerModule extends AbstractModule {
     }
 
     @Provides
-    public static SqlExecutor getExecutor() {
+    public SqlExecutor getExecutor() {
         return new PostgresqlExecutor(getConnection());
     }
 
     @Provides
-    public static DatabaseTableSchema getSchema() {
-        Set<Column> columnList = Set.of(
-                Column.with("id", Column.Type.SERIAL_PRIMARY_KEY, false),
-                Column.with("email", Column.Type.VARCHAR_255, true),
-                Column.with("salt", Column.Type.VARCHAR_255, true),
-                Column.with("hashed_password", Column.Type.VARCHAR_255, true)
-        );
-
-        return new DatabaseTableSchema("Users", columnList);
-    }
-
-    public static SqlTableController<MockUser> createController() {
-        Injector injector = Guice.createInjector(new MockDatabaseControllerModule());
-        final SqlTableController controller =  injector.getInstance(SqlTableController.class);
-        controller.setDeserializer(new MockUserDeserializer());
-        return controller;
-    }
+    public abstract DatabaseTableSchema getSchema();
 
     @Override
     protected void configure() {

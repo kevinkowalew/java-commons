@@ -1,4 +1,4 @@
-package databases.sql.postgresql.statements;
+package databases.sql.postgresql.statements.builders;
 
 public class DropTableStatement {
     public DropTableStatement() {

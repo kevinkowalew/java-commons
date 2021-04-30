@@ -1,5 +1,6 @@
 package databases.sql.postgresql.statements.builders;
 
+import databases.core.Pair;
 import databases.sql.Column;
 import databases.sql.SqlStatementBuilderException;
 import databases.sql.postgresql.statements.DatabaseTableSchema;
@@ -23,6 +24,7 @@ public class SelectStatement {
         private final String tableName;
         private final List<Column> selectedColumnNames = new ArrayList<>();
         private CompoundClause.Builder clauseBuilder = CompoundClause.newBuilder();
+        private List<Pair<Column>> joinTargets;
 
         private Builder(final String tableName) {
             this.tableName = tableName;
@@ -63,8 +65,12 @@ public class SelectStatement {
             return where(clause);
         }
 
+        public Builder innerJoin(final String tableName) {
+            return this;
+        }
+
         public String build() throws SqlStatementBuilderException {
-            final String columnsDescription = Formatter.createCommaSeparatedColumnsDescription(selectedColumnNames);
+            final String columnsDescription = Formatter.createColumnsDescription(selectedColumnNames);
             final String columnsStatement = selectedColumnNames.isEmpty() ? "*" : columnsDescription;
             final String whereStatement = Formatter.createWhereStatement(clauseBuilder.build());
 

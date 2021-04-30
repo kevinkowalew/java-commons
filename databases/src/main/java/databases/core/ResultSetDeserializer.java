@@ -11,7 +11,6 @@ public abstract class ResultSetDeserializer<T> implements Deserializer {
         if (!(object instanceof ResultSet)) {
             return null;
         } else {
-            // TODO: make this map over the results so we can have multiple rows returned
             ResultSet resultSet = (ResultSet) object;
             List<T> returnValue = new ArrayList<>();
 

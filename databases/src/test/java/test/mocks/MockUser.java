@@ -1,10 +1,10 @@
 package test.mocks;
 
 public class MockUser {
-    Integer id;
-    String email;
-    String salt;
-    String hashedPassword;
+    private Integer id;
+    private String email;
+    private String salt;
+    private String hashedPassword;
 
     public MockUser(Integer id, String name, String salt, String hashedPassword) {
         this.id = id;

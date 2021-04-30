@@ -1,4 +1,6 @@
-package databases.sql.postgresql.statements;
+package databases.sql.postgresql.statements.builders;
+
+import databases.sql.postgresql.statements.*;
 
 import java.util.ArrayList;
 import java.util.List;

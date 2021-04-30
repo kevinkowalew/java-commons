@@ -4,9 +4,7 @@ import com.google.inject.Inject;
 import databases.core.*;
 import databases.sql.postgresql.deserializers.TableExistsDeserializer;
 import databases.sql.postgresql.statements.*;
-import databases.sql.postgresql.statements.builders.InsertStatement;
-import databases.sql.postgresql.statements.builders.SelectStatement;
-import databases.sql.postgresql.statements.builders.UpdateStatement;
+import databases.sql.postgresql.statements.builders.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -72,6 +70,8 @@ public class SqlTableController<T> implements Database<T> {
         return UpdateStatement.newBuilder(schema);
     }
 
+    public JoinStatement.Builder joinStatementBuilder() { return JoinStatement.newBuilder(schema); }
+
     @Override
     public Optional<T> insert(InsertStatement.Builder builder) {
         if(insertBuilderIsMissingRequiredFields(builder)) {
@@ -128,6 +128,11 @@ public class SqlTableController<T> implements Database<T> {
         }
     }
 
+    @Override
+    public Optional<List<T>> join(JoinStatement.Builder builder) {
+        return Optional.empty();
+    }
+
     private Boolean executeUpdateWithBooleanReturnValue(final String statement, final Deserializer deserializer) {
         try {
             final DatabaseResponse response = executor.executeUpdate(statement, deserializer);
@@ -170,4 +175,5 @@ public class SqlTableController<T> implements Database<T> {
     public void setDeserializer(ResultSetDeserializer<T> deserializer) {
         this.deserializer = deserializer;
     }
+
 }
