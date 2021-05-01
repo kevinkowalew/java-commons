@@ -12,6 +12,9 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static databases.sql.postgresql.statements.builders.DropTableStatement.CASCADE_DELETE_TEMPLATE;
+import static databases.sql.postgresql.statements.builders.DropTableStatement.DELETE_TEMPLATE;
+
 /**
  * Base class for concrete SQL CRUD implementations to share logic
  */
@@ -36,9 +39,10 @@ public class SqlTableController<T> implements Database<T> {
         }
     }
 
-    public boolean dropTable() {
-        // TODO: add schema-defined permission to selectively allow this functionality
-        final String statement = DropTableStatement.create(schema.getTableName());
+    public boolean dropTable(boolean cascadeDelete) {
+        // TODO: add schema-defined permission to selectively disable this functionality for certain resources
+        final String template = cascadeDelete ? CASCADE_DELETE_TEMPLATE : DELETE_TEMPLATE;
+        final String statement = String.format(template, schema.getTableName());
         return executeUpdateWithBooleanReturnValue(statement, new SQLUpdateDeserializer());
     }
 
@@ -130,7 +134,8 @@ public class SqlTableController<T> implements Database<T> {
 
     @Override
     public Optional<List<T>> join(JoinStatement.Builder builder) {
-        return Optional.empty();
+        final String statement = builder.build();
+        return executeQueryWithListReturnValue(statement, deserializer);
     }
 
     private Boolean executeUpdateWithBooleanReturnValue(final String statement, final Deserializer deserializer) {

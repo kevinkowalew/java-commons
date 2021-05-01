@@ -8,6 +8,7 @@ import java.util.Optional;
 public class MockMessageDeserializer extends ResultSetDeserializer<MockMessage> {
     @Override
     public Optional<MockMessage> deserializeResultSet(ResultSet resultSet) {
+
         return Optional.empty();
     }
 

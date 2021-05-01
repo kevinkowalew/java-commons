@@ -53,7 +53,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     @Test
     public void test_TableExists_ReturnsFalse_For_Nonexistent_Table() {
         // Arrange...
-        userController.dropTable();
+        userController.dropTable(true);
 
         // Act...
         boolean tableExists = userController.tableExists();
@@ -65,7 +65,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     @Test
     public void test_CreateTable_HappyPath() {
         // Arrange...
-        userController.dropTable();
+        userController.dropTable(true);
 
         // Act...
         boolean success = userController.createTable();
@@ -77,7 +77,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     @Test
     public void test_CreateTable_RainyDay_ExistingTable_ReturnsFalse() {
         // Arrange...
-        userController.dropTable();
+        userController.dropTable(true);
 
         // Act...
         boolean tableExists = userController.tableExists();
@@ -147,7 +147,10 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     @Test
     public void test_Insert_RainyDay_NonexistentColumn() {
         // Arrange...
-        final Column missingColumn = Column.with("Missing Column", Column.Type.VARCHAR_255, false);
+        final Column missingColumn = Column.newBuilder()
+                .type(Column.Type.VARCHAR_255)
+                .named("Missing Column")
+                .build();
         final InsertStatement.Builder insertBuilder = userController.insertStatementBuilder()
                 .insert("154321", missingColumn);
         final SelectStatement.Builder selectStatement = userController.selectStatementBuilder();
@@ -271,16 +274,15 @@ public class PostgresqlDatabaseControllerIntegrationTests {
     @Test
     public void test_Inner_Join() {
         // Arrange...
-        insertTwoMockUsers();
-        insertTwoMockMessages();
+//        insertTwoMockUsers();
+//        insertTwoMockMessages();
         Join messagesUsersJoin = Join.innerJoin(
             MockMessageColumn.ID.getReferenceInTable("Users"),
-            MockMessageColumn.ID.getReferenceInTable("Messages")
+            MockMessageColumn.SENDER_ID.getReferenceInTable("Messages")
         );
 
         JoinStatement.Builder builder = messagesController.joinStatementBuilder().select(
-                MockMessageColumn.ID.getReferenceInTable("Messages"),
-                MockMessageColumn.RECIPIENT.getReferenceInTable("Messages"),
+                MockMessageColumn.RECIPIENT_ID.getReferenceInTable("Messages"),
                 MockMessageColumn.SENDER_ID.getReferenceInTable("Messages"),
                 MockMessageColumn.TEXT.getReferenceInTable("Messages"),
                 MockUsersColumn.ID.getReferenceInTable("Users"),
@@ -300,7 +302,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
         dropAndRecreateTableIfNeeded(messagesController);
         final InsertStatement.Builder builder = messagesController.insertStatementBuilder()
                 .insert(MOCK_ID_ONE_STRING, MockMessageColumn.SENDER_ID)
-                .insert(MOCK_ID_TWO_STRING, MockMessageColumn.RECIPIENT)
+                .insert(MOCK_ID_TWO_STRING, MockMessageColumn.RECIPIENT_ID)
                 .insert("hey!", MockMessageColumn.TEXT);
 
         // Act...
@@ -328,7 +330,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
 
     private void dropAndRecreateTableIfNeeded(SqlTableController controller) {
         if (controller.tableExists()) {
-            assert (controller.dropTable());
+            assert (controller.dropTable(controller == userController));
         }
         assert (controller.createTable());
     }

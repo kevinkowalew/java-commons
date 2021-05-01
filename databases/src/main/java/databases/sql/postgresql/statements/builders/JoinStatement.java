@@ -46,16 +46,21 @@ public class JoinStatement {
         }
 
         private String createJoinsDescription() {
-            final String prefix = "(".repeat(selectedColumns.size());
-            final String template = "%s%s";
+            final String leadingParenthesis = "".repeat(joins.size());
+            final String prefix = String.format("%s\"%s\"", leadingParenthesis, tableName);
+            final String template = "%s %s";
             final String joinsString = joins.stream()
                     .map(this::createJoinDescription)
                     .collect(Collectors.joining(""));
             return String.format(template, prefix, joinsString);
+//            SELECT "Messages".recipient_id, "Messages".sender_id, "Messages".text, U1.id, U1.email, U2.id, U2.email
+//            FROM "Messages"
+//            INNER JOIN "Users" as U1 ON U1.id = "Messages".sender_id
+//            INNER JOIN "Users" as U2 ON U2.id = "Messages".recipient_id
         }
 
         private String createJoinDescription(Join join) {
-            final String template = "%s %s ON %s)";
+            final String template = "%s \"%s\" ON %s;";
             final String joinDescription = join.getTypeDescription();
             final String otherTableName = getOtherTableName(join);
             final String columnMappingDescription = createColumnMappingDescription(join);

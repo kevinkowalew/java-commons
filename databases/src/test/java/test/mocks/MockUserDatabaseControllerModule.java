@@ -13,10 +13,10 @@ public class MockUserDatabaseControllerModule extends AbstractMockDatabaseContro
     @Override
     public DatabaseTableSchema getSchema() {
         Set<Column> columnList = Set.of(
-                Column.with("id", Column.Type.SERIAL_PRIMARY_KEY, false),
-                Column.with("email", Column.Type.VARCHAR_255, false),
-                Column.with("salt", Column.Type.VARCHAR_255, true),
-                Column.with("hashed_password", Column.Type.VARCHAR_255, true)
+                MockUsersColumn.ID,
+                MockUsersColumn.EMAIL,
+                MockUsersColumn.SALT,
+                MockUsersColumn.HASHED_PASSWORD
         );
         return new DatabaseTableSchema("Users", columnList);
     }

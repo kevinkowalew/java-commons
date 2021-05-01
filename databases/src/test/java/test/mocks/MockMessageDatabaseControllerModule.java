@@ -2,7 +2,6 @@ package test.mocks;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import databases.core.ResultSetDeserializer;
 import databases.sql.Column;
 import databases.sql.SqlTableController;
 import databases.sql.postgresql.statements.DatabaseTableSchema;
@@ -15,7 +14,7 @@ public class MockMessageDatabaseControllerModule extends AbstractMockDatabaseCon
         Set<Column> columnList = Set.of(
                 MockMessageColumn.ID,
                 MockMessageColumn.SENDER_ID,
-                MockMessageColumn.RECIPIENT,
+                MockMessageColumn.RECIPIENT_ID,
                 MockMessageColumn.TEXT
         );
         return new DatabaseTableSchema("Messages", columnList);

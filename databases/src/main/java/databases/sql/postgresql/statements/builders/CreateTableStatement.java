@@ -14,7 +14,7 @@ public class CreateTableStatement {
     public CreateTableStatement() {
     }
 
-    public static Optional<String> create(@Nonnull DatabaseTableSchema schema) {
+    public static Optional<String> create(DatabaseTableSchema schema) {
         Builder builder = newBuilder().setTableName(schema.getTableName());
         final Set<Column> columnList = schema.getColumns();
         columnList.forEach(builder::addColumn);

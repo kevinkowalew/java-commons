@@ -1,10 +1,29 @@
 package test.mocks;
 
 import databases.sql.Column;
+import databases.sql.postgresql.statements.ColumnReference;
+
+import static databases.sql.Column.Type.VARCHAR_255;
 
 public class MockMessageColumn {
-    public static final Column ID = Column.with("id", Column.Type.SERIAL_PRIMARY_KEY, false);
-    public static final Column SENDER_ID = Column.with("sender_id", Column.Type.FOREIGN_KEY, false);
-    public static final Column RECIPIENT = Column.with("recipient_id", Column.Type.FOREIGN_KEY, false);
-    public static final Column TEXT = Column.with("text", Column.Type.VARCHAR_255, false);
+    private static ColumnReference USERS_ID = MockUsersColumn.ID.getReferenceInTable("Users");
+
+    public static final Column ID = Column.newBuilder()
+            .serialPrimaryKey()
+            .named("id")
+            .build();
+    public static final Column SENDER_ID = Column.newBuilder()
+            .foreignKey(USERS_ID)
+            .named("sender_id")
+            .required()
+            .build();
+    public static final Column RECIPIENT_ID = Column.newBuilder()
+            .foreignKey(USERS_ID)
+            .named("recipient_id")
+            .required()
+            .build();
+    public static final Column TEXT = Column.newBuilder()
+            .type(VARCHAR_255)
+            .named("text")
+            .build();
 }
