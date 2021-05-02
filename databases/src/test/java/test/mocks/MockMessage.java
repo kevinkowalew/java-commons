@@ -1,21 +1,19 @@
 package test.mocks;
 
-import databases.sql.Column;
-
 public class MockMessage {
-    private final String id;
+    private final Integer id;
     private final String senderId;
     private final String recipientId;
     private final String text;
 
-    public MockMessage(String id, String senderId, String recipientId, String text) {
+    public MockMessage(Integer id, String senderId, String recipientId, String text) {
         this.id = id;
         this.senderId = senderId;
         this.recipientId = recipientId;
         this.text = text;
     }
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 

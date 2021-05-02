@@ -12,28 +12,17 @@ public class Formatter {
     private final static String COMMA_SPACE_DELIMITER = ", ";
     private final static String QUOTATION_MARK = "\"";
 
-    public static String createColumnReferencesDescription(List<ColumnReference> columnReferences) {
-        return columnReferences.stream()
-                .map(Formatter::createColumnReferenceDescription)
+    public static String createColumnsDescription(List<Column> columns) {
+        return columns.stream()
+                .map(Column::getName)
                 .collect(Collectors.joining(COMMA_SPACE_DELIMITER));
     }
 
-    public static String createColumnReferenceDescription(ColumnReference columnReference) {
+    public static String createColumnDescriptionWithTableName(Column column) {
         return joinWithSeparator(
-                surroundString(columnReference.getParentTableName(), QUOTATION_MARK),
-                columnReference.getColumn().getName(),
+                surroundString(column.getParentTableName(), QUOTATION_MARK),
+                column.getName(),
                 ".");
-    }
-
-    public static String createColumnsDescription(List<Column> columns) {
-        return columns.stream().map(Formatter::createColumnDescription).collect(Collectors.joining(COMMA_SPACE_DELIMITER));
-    }
-
-    public static String createColumnDescription(Column column) {
-        final String typeDescription = createColumnTypeDescription(column);
-        final String columnName = surroundString(column.getName(), "\"");
-        final String description = joinWithSpace(columnName, typeDescription);
-        return "\t" + description;
     }
 
     private static String joinWithSpace(String prefix, String suffix) {
@@ -44,33 +33,11 @@ public class Formatter {
         return String.format("%s%s%s", prefix, separator, suffix);
     }
 
-    private static String surroundString(String string, String surroundingString) {
+    public static String surroundString(String string, String surroundingString) {
         return String.format("%s%s%s", surroundingString, string, surroundingString);
     }
 
-    private static String createColumnTypeDescription(Column column) {
-        switch (column.getType()) {
-            case FOREIGN_KEY:
-                return createForeignKeyDescription(column);
-            case SERIAL_PRIMARY_KEY:
-                return "SERIAL PRIMARY KEY";
-            case VARCHAR_255:
-                return "VARCHAR(255)";
-            default:
-                return "";
-        }
-    }
 
-    private static String createForeignKeyDescription(Column column) {
-        if (column.getAssociatedColumn().isEmpty()) {
-            return "";
-        } else {
-            final ColumnReference columnReference = column.getAssociatedColumn().get();
-            final String template = "INT references %s (%s)";
-            final String tableName = Formatter.surroundString(columnReference.getParentTableName(), "\"");
-            return String.format(template, tableName, columnReference.getColumn().getName());
-        }
-    }
 
     public static String createWhereClauseDescription(WhereClause clause) {
         final String valueDescription = createValueDescription(clause.getValue());

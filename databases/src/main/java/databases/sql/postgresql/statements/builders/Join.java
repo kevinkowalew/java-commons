@@ -2,21 +2,20 @@ package databases.sql.postgresql.statements.builders;
 
 import databases.core.Pair;
 import databases.sql.Column;
-import databases.sql.postgresql.statements.ColumnReference;
 
 import javax.annotation.Nullable;
 
 public class Join {
     private final Type type;
-    private final Pair<ColumnReference> columnMapping;
+    private final Pair<Column> columnMapping;
 
-    private Join(Type type, Pair<ColumnReference> columnMapping) {
+    private Join(Type type, Pair<Column> columnMapping) {
         this.type = type;
         this.columnMapping = columnMapping;
     }
 
     @Nullable
-    public static Join innerJoin(ColumnReference... columnMappings) {
+    public static Join innerJoin(Column... columnMappings) {
         if (columnMappings.length != 2) {
             return null;
         } else {
@@ -33,7 +32,7 @@ public class Join {
         }
     }
 
-    public Pair<ColumnReference> getColumnMapping() {
+    public Pair<Column> getColumnMapping() {
         return columnMapping;
     }
 

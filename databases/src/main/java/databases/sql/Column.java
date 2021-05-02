@@ -1,20 +1,20 @@
 package databases.sql;
 
 
-import databases.sql.postgresql.statements.ColumnReference;
-
 import java.util.Objects;
 import java.util.Optional;
 
 public class Column {
     private final String name;
     private final Column.Type type;
+    private final String parentTableName;
     private final Boolean required;
-    private final Optional<ColumnReference> referencedColumn;
+    private final Optional<Column> referencedColumn;
 
     private Column(Builder builder) {
         this.name = builder.name;
         this.type = builder.type;
+        this.parentTableName = builder.parentTableName;
         this.required = builder.required;
         this.referencedColumn = builder.referencedColumn;
     }
@@ -25,9 +25,10 @@ public class Column {
 
     public static class Builder {
         private String name;
+        private String parentTableName;
         private Type type;
         private Boolean required = false;
-        private Optional<ColumnReference> referencedColumn = Optional.empty();
+        private Optional<Column> referencedColumn = Optional.empty();
 
         private Builder() {
         }
@@ -42,6 +43,11 @@ public class Column {
             return this;
         }
 
+        public Builder parentTableName(String parentTableName) {
+            this.parentTableName = parentTableName;
+            return this;
+        }
+
         public Builder required() {
             this.required = true;
             return this;
@@ -52,7 +58,7 @@ public class Column {
             return this;
         }
 
-        public Builder foreignKey(ColumnReference referencedColumn) {
+        public Builder foreignKey(Column referencedColumn) {
             this.type = Type.FOREIGN_KEY;
             this.referencedColumn = Optional.of(referencedColumn);
             return this;
@@ -76,12 +82,12 @@ public class Column {
         return required;
     }
 
-    public Optional<ColumnReference> getAssociatedColumn() {
+    public Optional<Column> getAssociatedColumn() {
         return referencedColumn;
     }
 
-    public ColumnReference getReferenceInTable(String tableName) {
-        return new ColumnReference(tableName, this);
+    public String getParentTableName() {
+        return parentTableName;
     }
 
     @Override

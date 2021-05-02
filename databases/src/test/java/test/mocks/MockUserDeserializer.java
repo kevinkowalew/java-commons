@@ -23,20 +23,4 @@ public class MockUserDeserializer extends ResultSetDeserializer<MockUser> {
     public Class<MockUser> getGenericClassReference() {
         return MockUser.class;
     }
-
-    public String extractFromResultSet(ResultSet resultSet, Column column) {
-        try {
-            return resultSet.getString(column.getName());
-        } catch (SQLException throwables) {
-            return "";
-        }
-    }
-
-    public Integer extractFromResultSet(ResultSet resultSet, Column column, Integer defaultValue) {
-        try {
-            return resultSet.getInt(column.getName());
-        } catch (SQLException throwables) {
-            return defaultValue;
-        }
-    }
 }

@@ -2,13 +2,10 @@ package databases.sql.postgresql.statements.builders;
 
 import databases.core.Pair;
 import databases.sql.Column;
-import databases.sql.postgresql.statements.ColumnReference;
 import databases.sql.postgresql.statements.DatabaseTableSchema;
 import databases.sql.postgresql.statements.Formatter;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class JoinStatement {
@@ -18,14 +15,14 @@ public class JoinStatement {
 
     public static class Builder {
         private final String tableName;
-        private final List<ColumnReference> selectedColumns = new ArrayList<>();
+        private final List<Column> selectedColumns = new ArrayList<>();
         private final List<Join> joins = new ArrayList<>();
 
         public Builder(String tableName) {
             this.tableName = tableName;
         }
 
-        public Builder select(ColumnReference... columns) {
+        public Builder select(Column... columns) {
             Collections.addAll(selectedColumns, columns);
             return this;
         }
@@ -41,8 +38,60 @@ public class JoinStatement {
 
         public String build() {
             final String template = "SELECT %s FROM %s;";
-            final String selectedColumnsDescription = Formatter.createColumnReferencesDescription(selectedColumns);
+            final String selectedColumnsDescription = createSelectedColumnsDescription(selectedColumns);
             return String.format(template, selectedColumnsDescription, createJoinsDescription());
+        }
+
+        private String createSelectedColumnsDescription(List<Column> selectedColumns) {
+            // find the potential tables we join multiple times
+            final Set<String> tableNamesWithMultipleJoins = getTableNamesWithMultipleJoins();
+            final Map<String,Integer> tableNameCountMap = new HashMap<>();
+            final List<String> columnDescriptions = new ArrayList<>();
+
+            for (Column column : selectedColumns) {
+                final String columnTableName = column.getParentTableName();
+                if (columnTableName.equals(tableName)) {
+                    final String description = Formatter.createColumnDescriptionWithTableName(column);
+                    columnDescriptions.add(description);
+                } else if (tableNamesWithMultipleJoins.contains(columnTableName)) {
+                    final Integer existingValue = tableNameCountMap.getOrDefault(columnTableName,1);
+                    tableNameCountMap.put(columnTableName, existingValue + 1);
+
+                    final String numberedTableName = column.getParentTableName() + existingValue;
+                    getSelectedColumnsForTableName(tableName).stream()
+                            .map(c -> createColumnDescriptionWithTableName(c, numberedTableName))
+                            .forEach(columnDescriptions::add);
+                } else{
+                    final String description = Formatter.createColumnDescriptionWithTableName(column);
+                    columnDescriptions.add(description);
+                }
+            }
+
+            return columnDescriptions.stream().collect(Collectors.joining(", "));
+        }
+
+        private Set<String> getTableNamesWithMultipleJoins() {
+            final Map<String,Integer> occurrenceTableNameCount = new HashMap<>();
+            for(Join join : joins) {
+                final String tableName = getOtherTableName(join);
+                final Integer count = occurrenceTableNameCount.getOrDefault(tableName,0);
+                occurrenceTableNameCount.put(tableName, count + 1);
+            }
+            return occurrenceTableNameCount.entrySet().stream()
+                    .filter(entry -> entry.getValue() > 1)
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toSet());
+        }
+
+        private List<Column> getSelectedColumnsForTableName(String tableName) {
+            return selectedColumns.stream()
+                    .filter(c -> c.getParentTableName().equals(tableName))
+                    .collect(Collectors.toList());
+        }
+
+        private String createColumnDescriptionWithTableName(Column column, String tableName) {
+            final String template = "%s.%s";
+            return String.format(template, tableName, column.getName());
         }
 
         private String createJoinsDescription() {
@@ -53,14 +102,10 @@ public class JoinStatement {
                     .map(this::createJoinDescription)
                     .collect(Collectors.joining(""));
             return String.format(template, prefix, joinsString);
-//            SELECT "Messages".recipient_id, "Messages".sender_id, "Messages".text, U1.id, U1.email, U2.id, U2.email
-//            FROM "Messages"
-//            INNER JOIN "Users" as U1 ON U1.id = "Messages".sender_id
-//            INNER JOIN "Users" as U2 ON U2.id = "Messages".recipient_id
         }
 
         private String createJoinDescription(Join join) {
-            final String template = "%s \"%s\" ON %s;";
+            final String template = "%s \"%s\" ON %s";
             final String joinDescription = join.getTypeDescription();
             final String otherTableName = getOtherTableName(join);
             final String columnMappingDescription = createColumnMappingDescription(join);
@@ -69,8 +114,8 @@ public class JoinStatement {
 
         private String createColumnMappingDescription(Join join) {
             final String template = "%s = %s";
-            final String leadingColumnDescription = Formatter.createColumnReferenceDescription(join.getColumnMapping().getLeading());
-            final String trailingColumnDescription = Formatter.createColumnReferenceDescription(join.getColumnMapping().getTrailing());
+            final String leadingColumnDescription = Formatter.createColumnDescriptionWithTableName(join.getColumnMapping().getLeading());
+            final String trailingColumnDescription = Formatter.createColumnDescriptionWithTableName(join.getColumnMapping().getTrailing());
             return String.format(template, leadingColumnDescription, trailingColumnDescription);
         }
 
