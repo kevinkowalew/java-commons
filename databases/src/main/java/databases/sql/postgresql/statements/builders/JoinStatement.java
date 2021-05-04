@@ -5,6 +5,7 @@ import databases.sql.Column;
 import databases.sql.postgresql.statements.DatabaseTableSchema;
 import databases.sql.postgresql.statements.Formatter;
 
+import java.sql.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,44 +38,41 @@ public class JoinStatement {
         }
 
         public String build() {
-            final String template = "SELECT %s FROM %s;";
-            final String selectedColumnsDescription = createSelectedColumnsDescription(selectedColumns);
-            return String.format(template, selectedColumnsDescription, createJoinsDescription());
-        }
-
-        private String createSelectedColumnsDescription(List<Column> selectedColumns) {
-            // find the potential tables we join multiple times
             final Set<String> tableNamesWithMultipleJoins = getTableNamesWithMultipleJoins();
-            final Map<String,Integer> tableNameCountMap = new HashMap<>();
+            final List<String> tableNameDescriptions = new ArrayList<>();
             final List<String> columnDescriptions = new ArrayList<>();
+            final Map<String, Integer> tableNameCountMap = new HashMap<>();
 
-            for (Column column : selectedColumns) {
+            for(Column column : selectedColumns) {
                 final String columnTableName = column.getParentTableName();
                 if (columnTableName.equals(tableName)) {
                     final String description = Formatter.createColumnDescriptionWithTableName(column);
                     columnDescriptions.add(description);
+                    tableNameDescriptions.add(columnTableName);
                 } else if (tableNamesWithMultipleJoins.contains(columnTableName)) {
-                    final Integer existingValue = tableNameCountMap.getOrDefault(columnTableName,1);
+                    final Integer existingValue = tableNameCountMap.getOrDefault(columnTableName, 1);
                     tableNameCountMap.put(columnTableName, existingValue + 1);
 
                     final String numberedTableName = column.getParentTableName() + existingValue;
-                    getSelectedColumnsForTableName(tableName).stream()
+                    getSelectedColumnsForTableName(columnTableName).stream()
                             .map(c -> createColumnDescriptionWithTableName(c, numberedTableName))
                             .forEach(columnDescriptions::add);
-                } else{
+                    tableNameDescriptions.add(numberedTableName);
+                } else {
                     final String description = Formatter.createColumnDescriptionWithTableName(column);
                     columnDescriptions.add(description);
+                    tableNameDescriptions.add(columnTableName);
                 }
             }
-
-            return columnDescriptions.stream().collect(Collectors.joining(", "));
+            final String template = "SELECT %s FROM %s;";
+            return String.format(template, "", createJoinsDescription());
         }
 
         private Set<String> getTableNamesWithMultipleJoins() {
-            final Map<String,Integer> occurrenceTableNameCount = new HashMap<>();
-            for(Join join : joins) {
-                final String tableName = getOtherTableName(join);
-                final Integer count = occurrenceTableNameCount.getOrDefault(tableName,0);
+            final Map<String, Integer> occurrenceTableNameCount = new HashMap<>();
+            for (Join join : joins) {
+                final String tableName = getOtherTableNameForJoin(join);
+                final Integer count = occurrenceTableNameCount.getOrDefault(tableName, 0);
                 occurrenceTableNameCount.put(tableName, count + 1);
             }
             return occurrenceTableNameCount.entrySet().stream()
@@ -90,7 +88,7 @@ public class JoinStatement {
         }
 
         private String createColumnDescriptionWithTableName(Column column, String tableName) {
-            final String template = "%s.%s";
+            final String template = "\"%s\".%s";
             return String.format(template, tableName, column.getName());
         }
 
@@ -100,16 +98,16 @@ public class JoinStatement {
             final String template = "%s %s";
             final String joinsString = joins.stream()
                     .map(this::createJoinDescription)
-                    .collect(Collectors.joining(""));
+                    .collect(Collectors.joining(" "));
             return String.format(template, prefix, joinsString);
         }
 
         private String createJoinDescription(Join join) {
             final String template = "%s \"%s\" ON %s";
-            final String joinDescription = join.getTypeDescription();
-            final String otherTableName = getOtherTableName(join);
+            final String typeDescription = join.getTypeDescription();
+            final String otherTableName = getOtherTableNameForJoin(join);
             final String columnMappingDescription = createColumnMappingDescription(join);
-            return String.format(template, joinDescription, otherTableName, columnMappingDescription);
+            return String.format(template, typeDescription, otherTableName, columnMappingDescription);
         }
 
         private String createColumnMappingDescription(Join join) {
@@ -119,8 +117,7 @@ public class JoinStatement {
             return String.format(template, leadingColumnDescription, trailingColumnDescription);
         }
 
-
-        private String getOtherTableName(Join join) {
+        private String getOtherTableNameForJoin(Join join) {
             if (!join.getColumnMapping().getLeading().getParentTableName().equals(tableName)) {
                 return join.getColumnMapping().getLeading().getParentTableName();
             } else {

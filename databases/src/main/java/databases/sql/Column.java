@@ -25,8 +25,8 @@ public class Column {
 
     public static class Builder {
         private String name;
-        private String parentTableName;
         private Type type;
+        private String parentTableName;
         private Boolean required = false;
         private Optional<Column> referencedColumn = Optional.empty();
 
@@ -88,6 +88,20 @@ public class Column {
 
     public String getParentTableName() {
         return parentTableName;
+    }
+
+    public Builder toBuilder() {
+        Builder builder = newBuilder().named(name).type(type).parentTableName(parentTableName);
+        if (required) {
+            builder = builder.required();
+        }
+        if (type == Type.SERIAL_PRIMARY_KEY) {
+            builder = builder.serialPrimaryKey();
+        }
+        if (referencedColumn.isPresent()) {
+            builder = builder.foreignKey(referencedColumn.get());
+        }
+        return builder;
     }
 
     @Override

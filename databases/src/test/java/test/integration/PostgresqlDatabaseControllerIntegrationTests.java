@@ -6,7 +6,6 @@ import databases.sql.postgresql.statements.builders.*;
 import databases.sql.postgresql.statements.WhereClause;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import test.mocks.*;
 
@@ -14,7 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static databases.sql.postgresql.statements.WhereClauseOperator.EQUALS;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static test.mocks.MockUsersColumn.EMAIL;
 import static test.mocks.MockUsersColumn.ID;
 
@@ -289,12 +289,12 @@ public class PostgresqlDatabaseControllerIntegrationTests {
         insertTwoMockMessages();
 
         Join recipientJoin = Join.innerJoin(
-            MockMessageColumn.ID,
+            MockUsersColumn.ID,
             MockMessageColumn.RECIPIENT_ID
         );
 
         Join senderJoin = Join.innerJoin(
-                MockMessageColumn.ID,
+                MockUsersColumn.ID,
                 MockMessageColumn.SENDER_ID
         );
 
@@ -303,7 +303,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
                 MockMessageColumn.TEXT,
                 MockUsersColumn.ID,
                 MockUsersColumn.EMAIL
-        ).join(senderJoin);
+        ).join(senderJoin).join(recipientJoin);
 
         // Act...
         Optional<List<MockMessage>> result = messagesController.join(builder);

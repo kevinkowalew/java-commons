@@ -13,12 +13,11 @@ import docker.fields.NamedVolume;
 import docker.fields.Port;
 import docker.fields.Volume;
 import docker.fields.enums.Restart;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import test.mocks.AbstractMockDatabaseControllerModule;
-
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PostgresqlDeploymentConfigurationToDeploymentTests {
 
