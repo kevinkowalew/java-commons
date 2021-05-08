@@ -13,8 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static databases.sql.postgresql.statements.WhereClauseOperator.EQUALS;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 import static test.mocks.MockUsersColumn.EMAIL;
 import static test.mocks.MockUsersColumn.ID;
 
@@ -113,7 +112,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
 
         // Assert...
         assert (user.isPresent());
-        assertEquals(MOCK_ID_ONE, user.get().getId());
+        assertEquals(MOCK_ID_ONE_STRING, user.get().getId());
         assertEquals(MOCK_EMAIL_ONE, user.get().getEmail());
         assertEquals(MOCK_SALT, user.get().getSalt());
         assertEquals(MOCK_HASHED_PASSWORD, user.get().getHashedPassword());
@@ -134,7 +133,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
 
         // Assert...
         assert (user.isPresent());
-        assertEquals(MOCK_ID_ONE, user.get().getId());
+        assertEquals(MOCK_ID_ONE_STRING, user.get().getId());
         assertEquals(MOCK_EMAIL_ONE, user.get().getEmail());
         assertEquals("", user.get().getSalt());
         assertEquals("", user.get().getHashedPassword());
@@ -218,7 +217,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
         // Assert...
         assertEquals(firstReadResults.get().size(), 1);
         MockUser user = firstReadResults.get().get(0);
-        assertEquals(MOCK_ID_ONE, user.getId());
+        assertEquals(MOCK_ID_ONE_STRING, user.getId());
         assertEquals(MOCK_EMAIL_ONE, user.getEmail());
         assertEquals(MOCK_SALT, user.getSalt());
         assertEquals(MOCK_HASHED_PASSWORD, user.getHashedPassword());
@@ -227,7 +226,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
 
         assertEquals(secondReadResults.get().size(), 1);
         user = secondReadResults.get().get(0);
-        assertEquals(MOCK_ID_ONE, user.getId());
+        assertEquals(MOCK_ID_ONE_STRING, user.getId());
         assertEquals(MOCK_EMAIL_TWO, user.getEmail());
         assertEquals(updatedSalt, user.getSalt());
         assertEquals(updatedHashedPassword, user.getHashedPassword());
@@ -249,13 +248,13 @@ public class PostgresqlDatabaseControllerIntegrationTests {
         assertEquals(2, results.get().size());
 
         MockUser user = results.get().get(0);
-        assertEquals(MOCK_ID_ONE, user.getId());
+        assertEquals(MOCK_ID_ONE_STRING, user.getId());
         assertEquals(MOCK_EMAIL_ONE, user.getEmail());
         assertEquals(MOCK_SALT, user.getSalt());
         assertEquals(MOCK_HASHED_PASSWORD, user.getHashedPassword());
 
         user = results.get().get(1);
-        assertEquals(MOCK_ID_TWO, user.getId());
+        assertEquals(MOCK_ID_TWO_STRING, user.getId());
         assertEquals(MOCK_EMAIL_TWO, user.getEmail());
         assertEquals(MOCK_SALT, user.getSalt());
         assertEquals(MOCK_HASHED_PASSWORD, user.getHashedPassword());
@@ -276,39 +275,54 @@ public class PostgresqlDatabaseControllerIntegrationTests {
         assert (results.isPresent());
         assertEquals(1, results.get().size());
         MockUser user = results.get().get(0);
-        assertEquals(MOCK_ID_TWO, user.getId());
+        assertEquals(MOCK_ID_TWO_STRING, user.getId());
         assertEquals(MOCK_EMAIL_TWO, user.getEmail());
         assertEquals(MOCK_SALT, user.getSalt());
         assertEquals(MOCK_HASHED_PASSWORD, user.getHashedPassword());
     }
 
     @Test
-    public void test_Inner_Join() {
+    public void test_Inner_Join_MultiTables() {
         // Arrange...
         insertTwoMockUsers();
         insertTwoMockMessages();
 
-        Join recipientJoin = Join.innerJoin(
-            MockUsersColumn.ID,
-            MockMessageColumn.RECIPIENT_ID
-        );
+        Join recipientJoin = Join.newBuilder()
+                .innerJoin()
+                .to(MockUsersColumn.ID)
+                .from(MockMessageColumn.RECIPIENT_ID)
+                .select(duplicateColumnWithAlias(ID, "recipient_id"))
+                .select(duplicateColumnWithAlias(EMAIL, "recipient_email"))
+                .build();
 
-        Join senderJoin = Join.innerJoin(
-                MockUsersColumn.ID,
-                MockMessageColumn.SENDER_ID
-        );
+        Join senderJoin = Join.newBuilder()
+                .innerJoin()
+                .to(MockUsersColumn.ID)
+                .from(MockMessageColumn.SENDER_ID)
+                .select(duplicateColumnWithAlias(ID, "sender_id"))
+                .select(duplicateColumnWithAlias(EMAIL, "sender_email"))
+                .build();
 
-        JoinStatement.Builder builder = messagesController.joinStatementBuilder().select(
-                MockMessageColumn.SENDER_ID,
-                MockMessageColumn.TEXT,
-                MockUsersColumn.ID,
-                MockUsersColumn.EMAIL
-        ).join(senderJoin).join(recipientJoin);
+        JoinStatement.Builder builder = JoinStatement.newBuilder(MockMessageDatabaseControllerModule.getDatabaseSchema())
+                .select(MockMessageColumn.TEXT, MockMessageColumn.ID)
+                .join(recipientJoin)
+                .join(senderJoin);
 
         // Act...
         Optional<List<MockMessage>> result = messagesController.join(builder);
 
         // Assert...
+        assert (result.isPresent());
+        assertFalse(result.get().isEmpty());
+
+        final MockMessage message = result.get().get(0);
+        assertEquals(message.getSender().getEmail(), MOCK_EMAIL_ONE);
+        assertEquals(message.getSender().getId(), MOCK_ID_ONE_STRING);
+
+        assertEquals(message.getRecipient().getEmail(), MOCK_EMAIL_TWO);
+        assertEquals(message.getRecipient().getId(), MOCK_ID_TWO_STRING);
+        assertNotEquals("-1", message.getId());
+        assertNotEquals("", message.getText());
     }
 
     private void insertTwoMockMessages() {
@@ -321,7 +335,7 @@ public class PostgresqlDatabaseControllerIntegrationTests {
         // Act...
         Optional<MockMessage> result = messagesController.insert(builder);
 
-         //Assert...
+        // Assert...
         assert (result.isPresent());
     }
 
@@ -340,5 +354,11 @@ public class PostgresqlDatabaseControllerIntegrationTests {
 
     private void assertLoggerMessageWasRecorded(final String expectedMessage) {
         System.out.println(expectedMessage);
+    }
+
+    private Column duplicateColumnWithAlias(Column column, String joinAlias) {
+        return column.toBuilder()
+                .joinAlias(joinAlias)
+                .build();
     }
 }

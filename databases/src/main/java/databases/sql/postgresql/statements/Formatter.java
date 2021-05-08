@@ -18,9 +18,16 @@ public class Formatter {
                 .collect(Collectors.joining(COMMA_SPACE_DELIMITER));
     }
 
-    public static String createColumnDescriptionWithTableName(Column column) {
+    public static String createColumnDescription(Column column) {
         return joinWithSeparator(
                 surroundString(column.getParentTableName(), QUOTATION_MARK),
+                column.getName(),
+                ".");
+    }
+
+    public static String createColumnDescriptionWithAlternateName(Column column, String alternateName) {
+        return joinWithSeparator(
+                surroundString(alternateName, QUOTATION_MARK),
                 column.getName(),
                 ".");
     }

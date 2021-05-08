@@ -10,6 +10,7 @@ public class Column {
     private final String parentTableName;
     private final Boolean required;
     private final Optional<Column> referencedColumn;
+    private final Optional<String> joinAlias;
 
     private Column(Builder builder) {
         this.name = builder.name;
@@ -17,6 +18,7 @@ public class Column {
         this.parentTableName = builder.parentTableName;
         this.required = builder.required;
         this.referencedColumn = builder.referencedColumn;
+        this.joinAlias = builder.joinAlias;
     }
 
     public static Builder newBuilder() {
@@ -29,6 +31,7 @@ public class Column {
         private String parentTableName;
         private Boolean required = false;
         private Optional<Column> referencedColumn = Optional.empty();
+        private Optional<String> joinAlias = Optional.empty();
 
         private Builder() {
         }
@@ -64,6 +67,11 @@ public class Column {
             return this;
         }
 
+        public Builder joinAlias(String alias) {
+            this.joinAlias = Optional.ofNullable(alias);
+            return this;
+        }
+
         public Column build() {
             // TODO: add validation here
             return new Column(this);
@@ -90,16 +98,26 @@ public class Column {
         return parentTableName;
     }
 
+    public Optional<String> getJoinAlias() {
+        return joinAlias;
+    }
+
     public Builder toBuilder() {
         Builder builder = newBuilder().named(name).type(type).parentTableName(parentTableName);
         if (required) {
             builder = builder.required();
         }
+
         if (type == Type.SERIAL_PRIMARY_KEY) {
             builder = builder.serialPrimaryKey();
         }
+
         if (referencedColumn.isPresent()) {
             builder = builder.foreignKey(referencedColumn.get());
+        }
+
+        if (joinAlias.isPresent()) {
+            builder = builder.joinAlias(joinAlias.get());
         }
         return builder;
     }

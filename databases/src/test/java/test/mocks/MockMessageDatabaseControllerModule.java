@@ -11,6 +11,10 @@ import java.util.Set;
 public class MockMessageDatabaseControllerModule extends AbstractMockDatabaseControllerModule {
     @Override
     public DatabaseTableSchema getSchema() {
+        return MockMessageDatabaseControllerModule.getDatabaseSchema();
+    }
+
+    public static DatabaseTableSchema getDatabaseSchema() {
         Set<Column> columnList = Set.of(
                 MockMessageColumn.ID,
                 MockMessageColumn.SENDER_ID,
@@ -22,7 +26,7 @@ public class MockMessageDatabaseControllerModule extends AbstractMockDatabaseCon
 
     public static SqlTableController<MockMessage> createController() {
         Injector injector = Guice.createInjector(new MockMessageDatabaseControllerModule());
-        final SqlTableController controller =  injector.getInstance(SqlTableController.class);
+        final SqlTableController controller = injector.getInstance(SqlTableController.class);
         controller.setDeserializer(new MockMessageDeserializer());
         return controller;
     }

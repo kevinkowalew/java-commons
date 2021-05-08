@@ -1,21 +1,29 @@
 package test.mocks;
 
 import databases.core.ResultSetDeserializer;
+import databases.sql.Column;
 
 import java.sql.ResultSet;
 import java.util.Optional;
 
-import static test.mocks.MockMessageColumn.TEXT;
-import static test.mocks.MockUsersColumn.*;
+import static test.mocks.MockMessageColumn.*;
+import static test.mocks.MockMessageColumn.ID;
 
 public class MockMessageDeserializer extends ResultSetDeserializer<MockMessage> {
     @Override
     public Optional<MockMessage> deserializeResultSet(ResultSet resultSet) {
         final Integer id = extractFromResultSet(resultSet, ID, -1);
-        final String senderId = extractFromResultSet(resultSet, TEXT);
-        final String recipientId = extractFromResultSet(resultSet, TEXT);
-        final String text = extractFromResultSet(resultSet, TEXT);
-        return Optional.of( new MockMessage(id, senderId, recipientId, text));
+
+        final String senderId = extractValueFrom(resultSet, "sender_id").orElse("");
+        final String senderEmail = extractValueFrom(resultSet, "sender_email").orElse("");
+        final MockUser sender = new MockUser(senderId, senderEmail, null, null);
+
+        final String recipientId = extractValueFrom(resultSet, "recipient_id").orElse("");
+        final String recipientEmail = extractValueFrom(resultSet, "recipient_email").orElse("");
+        final MockUser recipient = new MockUser(recipientId, recipientEmail, null, null);
+
+        final String text = extractFromResultSet(resultSet, TEXT).orElse("");
+        return Optional.of( new MockMessage(id, text, sender, recipient) );
     }
 
     @Override

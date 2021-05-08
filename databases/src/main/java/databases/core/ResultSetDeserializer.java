@@ -34,11 +34,15 @@ public abstract class ResultSetDeserializer<T> implements Deserializer {
 
     public abstract Class<T> getGenericClassReference();
 
-    public String extractFromResultSet(ResultSet resultSet, Column column) {
+    public Optional<String> extractFromResultSet(ResultSet resultSet, Column column) {
+        return extractValueFrom(resultSet, column.getName());
+    }
+
+    public Optional<String> extractValueFrom(ResultSet resultSet, String key) {
         try {
-            return resultSet.getString(column.getName());
+            return Optional.ofNullable(resultSet.getString(key));
         } catch (SQLException throwables) {
-            return "";
+            return Optional.empty();
         }
     }
 
