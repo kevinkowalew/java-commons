@@ -1,7 +1,7 @@
 package databases.sql.postgresql.statements.builders;
 
-import databases.core.Pair;
 import databases.sql.Column;
+import databases.sql.postgresql.statements.WhereClause;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,12 +12,14 @@ public class Join {
     private final Column fromColumn;
     private final Column toColumn;
     private final List<Column> selectedColumns;
+    private final WhereClause whereClause;
 
     private Join(Builder builder) {
         this.type = builder.type;
         this.fromColumn = builder.from;
         this.toColumn = builder.to;
         this.selectedColumns = builder.selectedColumns;
+        this.whereClause = builder.whereClause;
     }
 
     public String getTypeDescription() {
@@ -50,6 +52,7 @@ public class Join {
         private Column from;
         private Column to;
         private List<Column> selectedColumns = new ArrayList<>();
+        private WhereClause whereClause;
 
         public Builder innerJoin() {
             type = Type.INNER_JOIN;
@@ -73,6 +76,11 @@ public class Join {
 
         public Join build() {
             return new Join(this);
+        }
+
+        public Builder where(WhereClause whereClause) {
+            this.whereClause = whereClause;
+            return this;
         }
     }
 
