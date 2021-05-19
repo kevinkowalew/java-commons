@@ -118,7 +118,6 @@ public class PostgresqlDatabaseControllerIntegrationTests {
         assertEquals(MOCK_HASHED_PASSWORD, user.get().getHashedPassword());
     }
 
-
     @Test
     public void test_Insert_SunnyDay_Return_SpecificValues() {
         // Arrange...
@@ -287,18 +286,27 @@ public class PostgresqlDatabaseControllerIntegrationTests {
         insertTwoMockUsers();
         insertTwoMockMessages();
 
+        final JoinMapping recipientIdMapping = JoinMapping.newBuilder()
+                .from(MockMessageColumn.RECIPIENT_ID)
+                .to(MockUsersColumn.ID)
+                .alias("recipient_id")
+                .build();
+        final JoinMapping senderIdMapping = JoinMapping.newBuilder()
+                .from(MockMessageColumn.SENDER_ID)
+                .to(MockUsersColumn.ID)
+                .alias("sender_id")
+                .build();
+
         Join recipientJoin = Join.newBuilder()
                 .innerJoin()
-                .to(MockUsersColumn.ID)
-                .from(MockMessageColumn.RECIPIENT_ID)
+                .mapping(senderIdMapping)
                 .select(duplicateColumnWithAlias(ID, "recipient_id"))
                 .select(duplicateColumnWithAlias(EMAIL, "recipient_email"))
                 .build();
 
         Join senderJoin = Join.newBuilder()
                 .innerJoin()
-                .to(MockUsersColumn.ID)
-                .from(MockMessageColumn.SENDER_ID)
+                .mapping(senderIdMapping)
                 .select(duplicateColumnWithAlias(ID, "sender_id"))
                 .select(duplicateColumnWithAlias(EMAIL, "sender_email"))
                 .build();
@@ -358,7 +366,6 @@ public class PostgresqlDatabaseControllerIntegrationTests {
 
     private Column duplicateColumnWithAlias(Column column, String joinAlias) {
         return column.toBuilder()
-                .joinAlias(joinAlias)
                 .build();
     }
 }

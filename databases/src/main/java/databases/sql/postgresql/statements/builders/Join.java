@@ -9,15 +9,13 @@ import java.util.List;
 
 public class Join {
     private final Type type;
-    private final Column fromColumn;
-    private final Column toColumn;
+    private final JoinMapping mapping;
     private final List<Column> selectedColumns;
     private final WhereClause whereClause;
 
     private Join(Builder builder) {
         this.type = builder.type;
-        this.fromColumn = builder.from;
-        this.toColumn = builder.to;
+        this.mapping = builder.mapping;
         this.selectedColumns = builder.selectedColumns;
         this.whereClause = builder.whereClause;
     }
@@ -31,12 +29,12 @@ public class Join {
         }
     }
 
-    public Column getToColumn() {
-        return toColumn;
+    public JoinMapping getMapping() {
+        return mapping;
     }
 
-    public Column getFromColumn() {
-        return fromColumn;
+    public WhereClause getWhereClause() {
+        return whereClause;
     }
 
     public List<Column> getSelectedColumns() {
@@ -49,8 +47,7 @@ public class Join {
 
     public static class Builder {
         private Type type;
-        private Column from;
-        private Column to;
+        public JoinMapping mapping;
         private List<Column> selectedColumns = new ArrayList<>();
         private WhereClause whereClause;
 
@@ -59,13 +56,8 @@ public class Join {
             return this;
         }
 
-        public Builder from(Column column) {
-            this.from = column;
-            return this;
-        }
-
-        public Builder to(Column column) {
-            this.to = column;
+        public Builder mapping(JoinMapping mapping) {
+            this.mapping = mapping;
             return this;
         }
 

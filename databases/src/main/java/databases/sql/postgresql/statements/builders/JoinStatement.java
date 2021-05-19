@@ -61,7 +61,7 @@ public class JoinStatement {
 
             final Map<String, Integer> seenTableCountMap = new HashMap<>();
             for (Join join : joins) {
-                final String parentTableName = join.getToColumn().getParentTableName();
+                final String parentTableName = join.getMapping().getTo().getParentTableName();
                 if (!tableNamesWithMultipleJoins.contains(parentTableName)) {
                     continue;
                 }
@@ -71,16 +71,16 @@ public class JoinStatement {
 
                 final String numberedName = parentTableName + (existingCount + 1);
                 join.getSelectedColumns().stream()
-                        .map(column -> createMultiTableJoinDescription(column, numberedName))
+                        .map(column -> createMultiTableJoinDescription(column, numberedName, join.getMapping().getAlias().get()))
                         .forEach(columnDescriptions::add);
             }
 
             return flattenToCommaSeparatedString(columnDescriptions);
         }
 
-        private String createMultiTableJoinDescription(Column column, String numberedName) {
+        private String createMultiTableJoinDescription(Column column, String numberedName, String alias) {
             final String template = "%s.%s as %s";
-            return String.format(template, surroundWithQuotes(numberedName), column.getName(), column.getJoinAlias().get());
+            return String.format(template, surroundWithQuotes(numberedName), column.getName(), alias);
         }
 
         private String flattenToCommaSeparatedString(List<String> strings) {
@@ -94,7 +94,7 @@ public class JoinStatement {
         private Set<String> getTableNamesWithMultipleJoins() {
             final Map<String, Integer> occurrenceTableNameCount = new HashMap<>();
             for (Join join : joins) {
-                final String tableName = join.getToColumn().getParentTableName();
+                final String tableName = join.getMapping().getTo().getParentTableName();
                 final Integer count = occurrenceTableNameCount.getOrDefault(tableName, 0);
                 occurrenceTableNameCount.put(tableName, count + 1);
             }
@@ -110,7 +110,7 @@ public class JoinStatement {
             final List<String> descriptions = new ArrayList<>();
 
             for (Join join : joins) {
-                final String otherTableNameForJoin = join.getToColumn().getParentTableName();
+                final String otherTableNameForJoin = join.getMapping().getTo().getParentTableName();
                 final String typeDescription = join.getTypeDescription();
 
                 if (tableNamesWithMultipleJoins.contains(otherTableNameForJoin)) {
@@ -146,24 +146,24 @@ public class JoinStatement {
 
         private String createColumnMappingDescriptionWithTableName(Join join, String tableName) {
             final String template = "%s = %s";
-            final String leadingColumnDescription = createColumnDescriptionWithTableName(join.getFromColumn(), tableName);
-            final String trailingColumnDescription = createColumnDescriptionWithTableName(join.getToColumn(), tableName);
+            final String leadingColumnDescription = createJoinTargetDescription(join.getMapping(), tableName);
+            final String trailingColumnDescription = createJoinTargetDescription(join.getMapping(), tableName);
             return String.format(template, leadingColumnDescription, trailingColumnDescription);
         }
 
-        private String createColumnDescriptionWithTableName(Column column, String tableName) {
-            if (column.getJoinAlias().isPresent()) {
+        private String createJoinTargetDescription(JoinMapping joinMapping, String tableName) {
+            if (joinMapping.getAlias().isPresent()) {
                 final String template = "%s.%s as %s";
                 final String formattedTableName = surroundWithQuotes(tableName);
-                final String joinAlias = column.getJoinAlias().get();
-                return String.format(template, formattedTableName, column.getName(), joinAlias);
-            } else if (tableName.contains(column.getParentTableName())) {
+                final String joinAlias = joinMapping.getAlias().get();
+                return String.format(template, formattedTableName, joinMapping.getTo().getName(), joinAlias);
+            } else if (tableName.contains(joinMapping.getTo().getParentTableName())) {
                 final String template = "%s.%s";
-                return String.format(template, surroundWithQuotes(tableName), column.getName());
+                return String.format(template, surroundWithQuotes(tableName), joinMapping.getTo().getName());
             } else {
                 final String template = "%s.%s";
-                final String formattedTableName = surroundWithQuotes(column.getParentTableName());
-                return String.format(template, formattedTableName, column.getName());
+                final String formattedTableName = surroundWithQuotes(joinMapping.getTo().getParentTableName());
+                return String.format(template, formattedTableName, joinMapping.getTo().getName());
             }
         }
     }
