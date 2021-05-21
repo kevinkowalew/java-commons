@@ -1,23 +1,21 @@
 package databases.sql.postgresql.statements.builders;
 
 import databases.sql.Column;
+import databases.sql.ColumnAlias;
 import databases.sql.postgresql.statements.WhereClause;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Join {
     private final Type type;
-    private final JoinMapping mapping;
-    private final List<Column> selectedColumns;
-    private final WhereClause whereClause;
+    private final JoinColumnMapping mapping;
+    private final List<ColumnAlias> selectedColumns;
 
     private Join(Builder builder) {
         this.type = builder.type;
         this.mapping = builder.mapping;
         this.selectedColumns = builder.selectedColumns;
-        this.whereClause = builder.whereClause;
     }
 
     public String getTypeDescription() {
@@ -29,15 +27,11 @@ public class Join {
         }
     }
 
-    public JoinMapping getMapping() {
+    public JoinColumnMapping getMapping() {
         return mapping;
     }
 
-    public WhereClause getWhereClause() {
-        return whereClause;
-    }
-
-    public List<Column> getSelectedColumns() {
+    public List<ColumnAlias> getSelectedColumns() {
         return selectedColumns;
     }
 
@@ -47,32 +41,23 @@ public class Join {
 
     public static class Builder {
         private Type type;
-        public JoinMapping mapping;
-        private List<Column> selectedColumns = new ArrayList<>();
+        public JoinColumnMapping mapping;
+        private List<ColumnAlias> selectedColumns = new ArrayList<>();
         private WhereClause whereClause;
 
-        public Builder innerJoin() {
+        public Builder innerJoin(JoinColumnMapping mapping) {
             type = Type.INNER_JOIN;
-            return this;
-        }
-
-        public Builder mapping(JoinMapping mapping) {
             this.mapping = mapping;
             return this;
         }
 
-        public Builder select(Column... columns) {
-            this.selectedColumns.addAll(Arrays.asList(columns));
+        public Builder select(Column column, String alias) {
+            this.selectedColumns.add(new ColumnAlias(column, alias));
             return this;
         }
 
         public Join build() {
             return new Join(this);
-        }
-
-        public Builder where(WhereClause whereClause) {
-            this.whereClause = whereClause;
-            return this;
         }
     }
 

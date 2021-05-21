@@ -3,11 +3,14 @@ package databases.sql.postgresql.statements.builders;
 
 import databases.core.Pair;
 import databases.sql.Column;
+import databases.sql.ColumnAlias;
 import databases.sql.postgresql.statements.DatabaseTableSchema;
 import databases.sql.postgresql.statements.Formatter;
+import databases.sql.postgresql.statements.WhereClause;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class JoinStatement {
     public static Builder newBuilder(DatabaseTableSchema schema) {
@@ -18,6 +21,7 @@ public class JoinStatement {
         private final String tableName;
         private final List<Column> selectedColumns = new ArrayList<>();
         private final List<Join> joins = new ArrayList<>();
+        private WhereClause whereClause;
 
         public Builder(String tableName) {
             this.tableName = tableName;
@@ -28,21 +32,31 @@ public class JoinStatement {
             return this;
         }
 
-        public Builder join(Join join) {
-            this.joins.add(join);
+        public Builder join(Join... join) {
+            this.joins.addAll(Arrays.asList(join));
             return this;
         }
 
-        public Builder on(Pair<Column> columnPair) {
+        public Builder where(WhereClause clause) {
+            this.whereClause = clause;
             return this;
         }
 
         public String build() {
-            final String template = "SELECT %s FROM %s %s;";
+            final String template = "SELECT %s FROM %s %s %s;";
             final String selectedColumnsDescription = createSelectedColumnsDescription();
             final String targetTableName = surroundWithQuotes(tableName);
             final String joinDescriptions = createJoinsDescription();
-            return String.format(template, selectedColumnsDescription, targetTableName, joinDescriptions);
+            final String whereClause = createWhereClause();
+            return String.format(template, selectedColumnsDescription, targetTableName, joinDescriptions, whereClause);
+        }
+
+        private String createWhereClause() {
+            if (whereClause == null) {
+                return "";
+            } else {
+                return "WHERE " + Formatter.createWhereClauseDescription(whereClause);
+            }
         }
 
         private String surroundWithQuotes(String tableName) {
@@ -71,16 +85,17 @@ public class JoinStatement {
 
                 final String numberedName = parentTableName + (existingCount + 1);
                 join.getSelectedColumns().stream()
-                        .map(column -> createMultiTableJoinDescription(column, numberedName, join.getMapping().getAlias().get()))
+                        .map(column -> createMultiTableJoinDescription(column, numberedName))
                         .forEach(columnDescriptions::add);
             }
 
             return flattenToCommaSeparatedString(columnDescriptions);
         }
 
-        private String createMultiTableJoinDescription(Column column, String numberedName, String alias) {
+        private String createMultiTableJoinDescription(ColumnAlias reference, String numberedName) {
             final String template = "%s.%s as %s";
-            return String.format(template, surroundWithQuotes(numberedName), column.getName(), alias);
+            final String columnName = reference.getColumn().getName();
+            return String.format(template, surroundWithQuotes(numberedName), columnName, reference.getAlias());
         }
 
         private String flattenToCommaSeparatedString(List<String> strings) {
@@ -146,25 +161,35 @@ public class JoinStatement {
 
         private String createColumnMappingDescriptionWithTableName(Join join, String tableName) {
             final String template = "%s = %s";
-            final String leadingColumnDescription = createJoinTargetDescription(join.getMapping(), tableName);
-            final String trailingColumnDescription = createJoinTargetDescription(join.getMapping(), tableName);
+            final String leadingColumnDescription = createJoinTargetDescription(join.getMapping().getFrom(), tableName);
+            final String trailingColumnDescription = createJoinTargetDescription(join.getMapping().getTo(), tableName);
             return String.format(template, leadingColumnDescription, trailingColumnDescription);
         }
 
-        private String createJoinTargetDescription(JoinMapping joinMapping, String tableName) {
-            if (joinMapping.getAlias().isPresent()) {
+        private String createJoinTargetDescription(Column column, String tableName) {
+            Optional<String> columnAlias = getAliasForJoin(column);
+            if (columnAlias.isPresent()) {
                 final String template = "%s.%s as %s";
                 final String formattedTableName = surroundWithQuotes(tableName);
-                final String joinAlias = joinMapping.getAlias().get();
-                return String.format(template, formattedTableName, joinMapping.getTo().getName(), joinAlias);
-            } else if (tableName.contains(joinMapping.getTo().getParentTableName())) {
+                final String formattedAlias = surroundWithQuotes(columnAlias.get());
+                return String.format(template, formattedTableName, column.getName(),formattedAlias);
+            } else if (tableName.contains(column.getParentTableName())) {
                 final String template = "%s.%s";
-                return String.format(template, surroundWithQuotes(tableName), joinMapping.getTo().getName());
+                return String.format(template, surroundWithQuotes(tableName), column.getName());
             } else {
                 final String template = "%s.%s";
-                final String formattedTableName = surroundWithQuotes(joinMapping.getTo().getParentTableName());
-                return String.format(template, formattedTableName, joinMapping.getTo().getName());
+                final String formattedTableName = surroundWithQuotes(column.getParentTableName());
+                return String.format(template, formattedTableName, column.getName());
             }
+        }
+
+        private Optional<String> getAliasForJoin(Column column) {
+            return joins.stream()
+                    .filter(join -> join.getMapping().getFrom().equals(column))
+                    .flatMap(join -> join.getSelectedColumns().stream())
+                    .filter(join -> join.getColumn().equals(column))
+                    .map(ColumnAlias::getAlias)
+                    .findFirst();
         }
     }
 }

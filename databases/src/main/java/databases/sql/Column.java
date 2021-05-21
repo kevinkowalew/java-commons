@@ -1,6 +1,8 @@
 package databases.sql;
 
 
+import databases.sql.postgresql.statements.builders.JoinColumnMapping;
+
 import java.util.Objects;
 import java.util.Optional;
 
@@ -21,6 +23,10 @@ public class Column {
 
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    public JoinColumnMapping joinMapping(Column column) {
+        return new JoinColumnMapping(this, column);
     }
 
     public static class Builder {

@@ -135,7 +135,7 @@ public class SqlTableController<T> implements Database<T> {
     @Override
     public Optional<List<T>> join(JoinStatement.Builder builder) {
         final String statement = builder.build();
-        return executeQueryWithListReturnValue(statement, deserializer);
+       return executeQueryWithListReturnValue(statement, deserializer);
     }
 
     private Boolean executeUpdateWithBooleanReturnValue(final String statement, final Deserializer deserializer) {

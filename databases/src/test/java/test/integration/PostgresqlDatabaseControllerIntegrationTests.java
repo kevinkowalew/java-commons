@@ -16,6 +16,8 @@ import static databases.sql.postgresql.statements.WhereClauseOperator.EQUALS;
 import static org.junit.Assert.*;
 import static test.mocks.MockUsersColumn.EMAIL;
 import static test.mocks.MockUsersColumn.ID;
+import static test.mocks.MockMessageColumn.RECIPIENT_ID;
+import static test.mocks.MockMessageColumn.SENDER_ID;
 
 public class PostgresqlDatabaseControllerIntegrationTests {
     private static final Integer MOCK_ID_ONE = 1;
@@ -286,42 +288,32 @@ public class PostgresqlDatabaseControllerIntegrationTests {
         insertTwoMockUsers();
         insertTwoMockMessages();
 
-        final JoinMapping recipientIdMapping = JoinMapping.newBuilder()
-                .from(MockMessageColumn.RECIPIENT_ID)
-                .to(MockUsersColumn.ID)
-                .alias("recipient_id")
-                .build();
-        final JoinMapping senderIdMapping = JoinMapping.newBuilder()
-                .from(MockMessageColumn.SENDER_ID)
-                .to(MockUsersColumn.ID)
-                .alias("sender_id")
-                .build();
+        final JoinColumnMapping recipientIdMapping = RECIPIENT_ID.joinMapping(ID);
+        final JoinColumnMapping senderIdMapping = SENDER_ID.joinMapping(ID);
 
         Join recipientJoin = Join.newBuilder()
-                .innerJoin()
-                .mapping(senderIdMapping)
-                .select(duplicateColumnWithAlias(ID, "recipient_id"))
-                .select(duplicateColumnWithAlias(EMAIL, "recipient_email"))
+                .innerJoin(recipientIdMapping)
+                .select(ID, "recipient_id")
+                .select(EMAIL, "recipient_email")
                 .build();
 
         Join senderJoin = Join.newBuilder()
-                .innerJoin()
-                .mapping(senderIdMapping)
-                .select(duplicateColumnWithAlias(ID, "sender_id"))
-                .select(duplicateColumnWithAlias(EMAIL, "sender_email"))
+                .innerJoin(senderIdMapping)
+                .select(ID, "sender_id")
+                .select(EMAIL, "sender_email")
                 .build();
 
         JoinStatement.Builder builder = JoinStatement.newBuilder(MockMessageDatabaseControllerModule.getDatabaseSchema())
                 .select(MockMessageColumn.TEXT, MockMessageColumn.ID)
-                .join(recipientJoin)
-                .join(senderJoin);
+                .join(recipientJoin, senderJoin)
+                .where( new WhereClause(SENDER_ID, EQUALS, 1) );
 
         // Act...
         Optional<List<MockMessage>> result = messagesController.join(builder);
 
         // Assert...
         assert (result.isPresent());
-        assertFalse(result.get().isEmpty());
+        assertEquals (result.get().size(),1);
 
         final MockMessage message = result.get().get(0);
         assertEquals(message.getSender().getEmail(), MOCK_EMAIL_ONE);
@@ -335,16 +327,22 @@ public class PostgresqlDatabaseControllerIntegrationTests {
 
     private void insertTwoMockMessages() {
         // Arrange...
-        final InsertStatement.Builder builder = messagesController.insertStatementBuilder()
+        final InsertStatement.Builder messageOneBuilder = messagesController.insertStatementBuilder()
                 .insert(MOCK_ID_ONE_STRING, MockMessageColumn.SENDER_ID)
                 .insert(MOCK_ID_TWO_STRING, MockMessageColumn.RECIPIENT_ID)
                 .insert("hey!", MockMessageColumn.TEXT);
+        final InsertStatement.Builder messageTwoBuilder = messagesController.insertStatementBuilder()
+                .insert(MOCK_ID_TWO_STRING, MockMessageColumn.SENDER_ID)
+                .insert(MOCK_ID_ONE_STRING, MockMessageColumn.RECIPIENT_ID)
+                .insert("hey!", MockMessageColumn.TEXT);
 
         // Act...
-        Optional<MockMessage> result = messagesController.insert(builder);
+        Optional<MockMessage> resultOne = messagesController.insert(messageOneBuilder);
+        Optional<MockMessage> resultTwo = messagesController.insert(messageTwoBuilder);
 
         // Assert...
-        assert (result.isPresent());
+        assert (resultOne.isPresent());
+        assert (resultTwo.isPresent());
     }
 
     private void insertTwoMockUsers() {

@@ -1,0 +1,493 @@
+From 242e2c524e00e42f168eb779524de245d6298680 Mon Sep 17 00:00:00 2001
+From: Kevin Kowalewski <kowalewski.ke@gmail.com>
+Date: Fri, 21 May 2021 15:42:05 -0500
+Subject: [PATCH] refactors join builders
+
+---
+ .../src/main/java/databases/sql/Column.java   |  6 ++
+ .../main/java/databases/sql/ColumnAlias.java  | 19 ++++++
+ .../databases/sql/SqlTableController.java     |  2 +-
+ .../postgresql/statements/builders/Join.java  | 35 +++--------
+ .../builders/JoinColumnMapping.java           | 23 +++++++
+ .../statements/builders/JoinMapping.java      | 61 -------------------
+ .../statements/builders/JoinStatement.java    | 61 +++++++++++++------
+ ...sqlDatabaseControllerIntegrationTests.java | 46 +++++++-------
+ 8 files changed, 124 insertions(+), 129 deletions(-)
+ create mode 100644 databases/src/main/java/databases/sql/ColumnAlias.java
+ create mode 100644 databases/src/main/java/databases/sql/postgresql/statements/builders/JoinColumnMapping.java
+ delete mode 100644 databases/src/main/java/databases/sql/postgresql/statements/builders/JoinMapping.java
+
+diff --git a/databases/src/main/java/databases/sql/Column.java b/databases/src/main/java/databases/sql/Column.java
+index b57ad0e..955f556 100644
+--- a/databases/src/main/java/databases/sql/Column.java
++++ b/databases/src/main/java/databases/sql/Column.java
+@@ -1,6 +1,8 @@
+ package databases.sql;
+ 
+ 
++import databases.sql.postgresql.statements.builders.JoinColumnMapping;
++
+ import java.util.Objects;
+ import java.util.Optional;
+ 
+@@ -23,6 +25,10 @@ public class Column {
+         return new Builder();
+     }
+ 
++    public JoinColumnMapping joinMapping(Column column) {
++        return new JoinColumnMapping(this, column);
++    }
++
+     public static class Builder {
+         private String name;
+         private Type type;
+diff --git a/databases/src/main/java/databases/sql/ColumnAlias.java b/databases/src/main/java/databases/sql/ColumnAlias.java
+new file mode 100644
+index 0000000..b853193
+--- /dev/null
++++ b/databases/src/main/java/databases/sql/ColumnAlias.java
+@@ -0,0 +1,19 @@
++package databases.sql;
++
++public class ColumnAlias {
++    private final Column column;
++    private final String alias;
++
++    public ColumnAlias(Column column, String alias) {
++        this.column = column;
++        this.alias = alias;
++    }
++
++    public Column getColumn() {
++        return column;
++    }
++
++    public String getAlias() {
++        return alias;
++    }
++}
+diff --git a/databases/src/main/java/databases/sql/SqlTableController.java b/databases/src/main/java/databases/sql/SqlTableController.java
+index 3d1d3b1..862570c 100644
+--- a/databases/src/main/java/databases/sql/SqlTableController.java
++++ b/databases/src/main/java/databases/sql/SqlTableController.java
+@@ -135,7 +135,7 @@ public class SqlTableController<T> implements Database<T> {
+     @Override
+     public Optional<List<T>> join(JoinStatement.Builder builder) {
+         final String statement = builder.build();
+-        return executeQueryWithListReturnValue(statement, deserializer);
++       return executeQueryWithListReturnValue(statement, deserializer);
+     }
+ 
+     private Boolean executeUpdateWithBooleanReturnValue(final String statement, final Deserializer deserializer) {
+diff --git a/databases/src/main/java/databases/sql/postgresql/statements/builders/Join.java b/databases/src/main/java/databases/sql/postgresql/statements/builders/Join.java
+index 713ab5f..143af7f 100644
+--- a/databases/src/main/java/databases/sql/postgresql/statements/builders/Join.java
++++ b/databases/src/main/java/databases/sql/postgresql/statements/builders/Join.java
+@@ -1,23 +1,21 @@
+ package databases.sql.postgresql.statements.builders;
+ 
+ import databases.sql.Column;
++import databases.sql.ColumnAlias;
+ import databases.sql.postgresql.statements.WhereClause;
+ 
+ import java.util.ArrayList;
+-import java.util.Arrays;
+ import java.util.List;
+ 
+ public class Join {
+     private final Type type;
+-    private final JoinMapping mapping;
+-    private final List<Column> selectedColumns;
+-    private final WhereClause whereClause;
++    private final JoinColumnMapping mapping;
++    private final List<ColumnAlias> selectedColumns;
+ 
+     private Join(Builder builder) {
+         this.type = builder.type;
+         this.mapping = builder.mapping;
+         this.selectedColumns = builder.selectedColumns;
+-        this.whereClause = builder.whereClause;
+     }
+ 
+     public String getTypeDescription() {
+@@ -29,15 +27,11 @@ public class Join {
+         }
+     }
+ 
+-    public JoinMapping getMapping() {
++    public JoinColumnMapping getMapping() {
+         return mapping;
+     }
+ 
+-    public WhereClause getWhereClause() {
+-        return whereClause;
+-    }
+-
+-    public List<Column> getSelectedColumns() {
++    public List<ColumnAlias> getSelectedColumns() {
+         return selectedColumns;
+     }
+ 
+@@ -47,33 +41,24 @@ public class Join {
+ 
+     public static class Builder {
+         private Type type;
+-        public JoinMapping mapping;
+-        private List<Column> selectedColumns = new ArrayList<>();
++        public JoinColumnMapping mapping;
++        private List<ColumnAlias> selectedColumns = new ArrayList<>();
+         private WhereClause whereClause;
+ 
+-        public Builder innerJoin() {
++        public Builder innerJoin(JoinColumnMapping mapping) {
+             type = Type.INNER_JOIN;
+-            return this;
+-        }
+-
+-        public Builder mapping(JoinMapping mapping) {
+             this.mapping = mapping;
+             return this;
+         }
+ 
+-        public Builder select(Column... columns) {
+-            this.selectedColumns.addAll(Arrays.asList(columns));
++        public Builder select(Column column, String alias) {
++            this.selectedColumns.add(new ColumnAlias(column, alias));
+             return this;
+         }
+ 
+         public Join build() {
+             return new Join(this);
+         }
+-
+-        public Builder where(WhereClause whereClause) {
+-            this.whereClause = whereClause;
+-            return this;
+-        }
+     }
+ 
+     private enum Type {
+diff --git a/databases/src/main/java/databases/sql/postgresql/statements/builders/JoinColumnMapping.java b/databases/src/main/java/databases/sql/postgresql/statements/builders/JoinColumnMapping.java
+new file mode 100644
+index 0000000..aaf7217
+--- /dev/null
++++ b/databases/src/main/java/databases/sql/postgresql/statements/builders/JoinColumnMapping.java
+@@ -0,0 +1,23 @@
++package databases.sql.postgresql.statements.builders;
++
++import databases.sql.Column;
++
++import java.util.Optional;
++
++public class JoinColumnMapping {
++    private final Column from;
++    private final Column to;
++
++    public JoinColumnMapping(Column from, Column to) {
++        this.from = from;
++        this.to = to;
++    }
++
++    public Column getFrom() {
++        return from;
++    }
++
++    public Column getTo() {
++        return to;
++    }
++}
+diff --git a/databases/src/main/java/databases/sql/postgresql/statements/builders/JoinMapping.java b/databases/src/main/java/databases/sql/postgresql/statements/builders/JoinMapping.java
+deleted file mode 100644
+index 89511d2..0000000
+--- a/databases/src/main/java/databases/sql/postgresql/statements/builders/JoinMapping.java
++++ /dev/null
+@@ -1,61 +0,0 @@
+-package databases.sql.postgresql.statements.builders;
+-
+-import databases.sql.Column;
+-
+-import java.util.Optional;
+-
+-public class JoinMapping {
+-    private final Column from;
+-    private final Column to;
+-    private final Optional<String> alias;
+-
+-    private JoinMapping(Builder builder) {
+-        this.from = builder.from;
+-        this.to = builder.to;
+-        this.alias = builder.alias;
+-    }
+-
+-    public Column getFrom() {
+-        return from;
+-    }
+-
+-    public Column getTo() {
+-        return to;
+-    }
+-
+-    public Optional<String> getAlias() {
+-        return alias;
+-    }
+-
+-    public static Builder newBuilder() {
+-        return new Builder();
+-    }
+-
+-    public static class Builder {
+-        private Column from;
+-        private Column to;
+-        private Optional<String> alias;
+-
+-        public Builder from(Column column) {
+-            this.from = column;
+-            return this;
+-        }
+-
+-        public Builder to(Column column) {
+-            this.to = column;
+-            return this;
+-        }
+-
+-        public Builder alias(final String alias) {
+-            this.alias = Optional.ofNullable(alias);
+-            return this;
+-        }
+-
+-        public JoinMapping build() {
+-            return new JoinMapping(this);
+-        }
+-
+-        private Builder() {
+-        }
+-    }
+-}
+diff --git a/databases/src/main/java/databases/sql/postgresql/statements/builders/JoinStatement.java b/databases/src/main/java/databases/sql/postgresql/statements/builders/JoinStatement.java
+index 2945e32..0b1b17e 100644
+--- a/databases/src/main/java/databases/sql/postgresql/statements/builders/JoinStatement.java
++++ b/databases/src/main/java/databases/sql/postgresql/statements/builders/JoinStatement.java
+@@ -3,11 +3,14 @@ package databases.sql.postgresql.statements.builders;
+ 
+ import databases.core.Pair;
+ import databases.sql.Column;
++import databases.sql.ColumnAlias;
+ import databases.sql.postgresql.statements.DatabaseTableSchema;
+ import databases.sql.postgresql.statements.Formatter;
++import databases.sql.postgresql.statements.WhereClause;
+ 
+ import java.util.*;
+ import java.util.stream.Collectors;
++import java.util.stream.Stream;
+ 
+ public class JoinStatement {
+     public static Builder newBuilder(DatabaseTableSchema schema) {
+@@ -18,6 +21,7 @@ public class JoinStatement {
+         private final String tableName;
+         private final List<Column> selectedColumns = new ArrayList<>();
+         private final List<Join> joins = new ArrayList<>();
++        private WhereClause whereClause;
+ 
+         public Builder(String tableName) {
+             this.tableName = tableName;
+@@ -28,21 +32,31 @@ public class JoinStatement {
+             return this;
+         }
+ 
+-        public Builder join(Join join) {
+-            this.joins.add(join);
++        public Builder join(Join... join) {
++            this.joins.addAll(Arrays.asList(join));
+             return this;
+         }
+ 
+-        public Builder on(Pair<Column> columnPair) {
++        public Builder where(WhereClause clause) {
++            this.whereClause = clause;
+             return this;
+         }
+ 
+         public String build() {
+-            final String template = "SELECT %s FROM %s %s;";
++            final String template = "SELECT %s FROM %s %s %s;";
+             final String selectedColumnsDescription = createSelectedColumnsDescription();
+             final String targetTableName = surroundWithQuotes(tableName);
+             final String joinDescriptions = createJoinsDescription();
+-            return String.format(template, selectedColumnsDescription, targetTableName, joinDescriptions);
++            final String whereClause = createWhereClause();
++            return String.format(template, selectedColumnsDescription, targetTableName, joinDescriptions, whereClause);
++        }
++
++        private String createWhereClause() {
++            if (whereClause == null) {
++                return "";
++            } else {
++                return "WHERE " + Formatter.createWhereClauseDescription(whereClause);
++            }
+         }
+ 
+         private String surroundWithQuotes(String tableName) {
+@@ -71,16 +85,17 @@ public class JoinStatement {
+ 
+                 final String numberedName = parentTableName + (existingCount + 1);
+                 join.getSelectedColumns().stream()
+-                        .map(column -> createMultiTableJoinDescription(column, numberedName, join.getMapping().getAlias().get()))
++                        .map(column -> createMultiTableJoinDescription(column, numberedName))
+                         .forEach(columnDescriptions::add);
+             }
+ 
+             return flattenToCommaSeparatedString(columnDescriptions);
+         }
+ 
+-        private String createMultiTableJoinDescription(Column column, String numberedName, String alias) {
++        private String createMultiTableJoinDescription(ColumnAlias reference, String numberedName) {
+             final String template = "%s.%s as %s";
+-            return String.format(template, surroundWithQuotes(numberedName), column.getName(), alias);
++            final String columnName = reference.getColumn().getName();
++            return String.format(template, surroundWithQuotes(numberedName), columnName, reference.getAlias());
+         }
+ 
+         private String flattenToCommaSeparatedString(List<String> strings) {
+@@ -146,25 +161,35 @@ public class JoinStatement {
+ 
+         private String createColumnMappingDescriptionWithTableName(Join join, String tableName) {
+             final String template = "%s = %s";
+-            final String leadingColumnDescription = createJoinTargetDescription(join.getMapping(), tableName);
+-            final String trailingColumnDescription = createJoinTargetDescription(join.getMapping(), tableName);
++            final String leadingColumnDescription = createJoinTargetDescription(join.getMapping().getFrom(), tableName);
++            final String trailingColumnDescription = createJoinTargetDescription(join.getMapping().getTo(), tableName);
+             return String.format(template, leadingColumnDescription, trailingColumnDescription);
+         }
+ 
+-        private String createJoinTargetDescription(JoinMapping joinMapping, String tableName) {
+-            if (joinMapping.getAlias().isPresent()) {
++        private String createJoinTargetDescription(Column column, String tableName) {
++            Optional<String> columnAlias = getAliasForJoin(column);
++            if (columnAlias.isPresent()) {
+                 final String template = "%s.%s as %s";
+                 final String formattedTableName = surroundWithQuotes(tableName);
+-                final String joinAlias = joinMapping.getAlias().get();
+-                return String.format(template, formattedTableName, joinMapping.getTo().getName(), joinAlias);
+-            } else if (tableName.contains(joinMapping.getTo().getParentTableName())) {
++                final String formattedAlias = surroundWithQuotes(columnAlias.get());
++                return String.format(template, formattedTableName, column.getName(),formattedAlias);
++            } else if (tableName.contains(column.getParentTableName())) {
+                 final String template = "%s.%s";
+-                return String.format(template, surroundWithQuotes(tableName), joinMapping.getTo().getName());
++                return String.format(template, surroundWithQuotes(tableName), column.getName());
+             } else {
+                 final String template = "%s.%s";
+-                final String formattedTableName = surroundWithQuotes(joinMapping.getTo().getParentTableName());
+-                return String.format(template, formattedTableName, joinMapping.getTo().getName());
++                final String formattedTableName = surroundWithQuotes(column.getParentTableName());
++                return String.format(template, formattedTableName, column.getName());
+             }
+         }
++
++        private Optional<String> getAliasForJoin(Column column) {
++            return joins.stream()
++                    .filter(join -> join.getMapping().getFrom().equals(column))
++                    .flatMap(join -> join.getSelectedColumns().stream())
++                    .filter(join -> join.getColumn().equals(column))
++                    .map(ColumnAlias::getAlias)
++                    .findFirst();
++        }
+     }
+ }
+\ No newline at end of file
+diff --git a/databases/src/test/java/test/integration/PostgresqlDatabaseControllerIntegrationTests.java b/databases/src/test/java/test/integration/PostgresqlDatabaseControllerIntegrationTests.java
+index a76dc24..f1172c4 100644
+--- a/databases/src/test/java/test/integration/PostgresqlDatabaseControllerIntegrationTests.java
++++ b/databases/src/test/java/test/integration/PostgresqlDatabaseControllerIntegrationTests.java
+@@ -16,6 +16,8 @@ import static databases.sql.postgresql.statements.WhereClauseOperator.EQUALS;
+ import static org.junit.Assert.*;
+ import static test.mocks.MockUsersColumn.EMAIL;
+ import static test.mocks.MockUsersColumn.ID;
++import static test.mocks.MockMessageColumn.RECIPIENT_ID;
++import static test.mocks.MockMessageColumn.SENDER_ID;
+ 
+ public class PostgresqlDatabaseControllerIntegrationTests {
+     private static final Integer MOCK_ID_ONE = 1;
+@@ -286,42 +288,32 @@ public class PostgresqlDatabaseControllerIntegrationTests {
+         insertTwoMockUsers();
+         insertTwoMockMessages();
+ 
+-        final JoinMapping recipientIdMapping = JoinMapping.newBuilder()
+-                .from(MockMessageColumn.RECIPIENT_ID)
+-                .to(MockUsersColumn.ID)
+-                .alias("recipient_id")
+-                .build();
+-        final JoinMapping senderIdMapping = JoinMapping.newBuilder()
+-                .from(MockMessageColumn.SENDER_ID)
+-                .to(MockUsersColumn.ID)
+-                .alias("sender_id")
+-                .build();
++        final JoinColumnMapping recipientIdMapping = RECIPIENT_ID.joinMapping(ID);
++        final JoinColumnMapping senderIdMapping = SENDER_ID.joinMapping(ID);
+ 
+         Join recipientJoin = Join.newBuilder()
+-                .innerJoin()
+-                .mapping(senderIdMapping)
+-                .select(duplicateColumnWithAlias(ID, "recipient_id"))
+-                .select(duplicateColumnWithAlias(EMAIL, "recipient_email"))
++                .innerJoin(recipientIdMapping)
++                .select(ID, "recipient_id")
++                .select(EMAIL, "recipient_email")
+                 .build();
+ 
+         Join senderJoin = Join.newBuilder()
+-                .innerJoin()
+-                .mapping(senderIdMapping)
+-                .select(duplicateColumnWithAlias(ID, "sender_id"))
+-                .select(duplicateColumnWithAlias(EMAIL, "sender_email"))
++                .innerJoin(senderIdMapping)
++                .select(ID, "sender_id")
++                .select(EMAIL, "sender_email")
+                 .build();
+ 
+         JoinStatement.Builder builder = JoinStatement.newBuilder(MockMessageDatabaseControllerModule.getDatabaseSchema())
+                 .select(MockMessageColumn.TEXT, MockMessageColumn.ID)
+-                .join(recipientJoin)
+-                .join(senderJoin);
++                .join(recipientJoin, senderJoin)
++                .where( new WhereClause(SENDER_ID, EQUALS, 1) );
+ 
+         // Act...
+         Optional<List<MockMessage>> result = messagesController.join(builder);
+ 
+         // Assert...
+         assert (result.isPresent());
+-        assertFalse(result.get().isEmpty());
++        assertEquals (result.get().size(),1);
+ 
+         final MockMessage message = result.get().get(0);
+         assertEquals(message.getSender().getEmail(), MOCK_EMAIL_ONE);
+@@ -335,16 +327,22 @@ public class PostgresqlDatabaseControllerIntegrationTests {
+ 
+     private void insertTwoMockMessages() {
+         // Arrange...
+-        final InsertStatement.Builder builder = messagesController.insertStatementBuilder()
++        final InsertStatement.Builder messageOneBuilder = messagesController.insertStatementBuilder()
+                 .insert(MOCK_ID_ONE_STRING, MockMessageColumn.SENDER_ID)
+                 .insert(MOCK_ID_TWO_STRING, MockMessageColumn.RECIPIENT_ID)
+                 .insert("hey!", MockMessageColumn.TEXT);
++        final InsertStatement.Builder messageTwoBuilder = messagesController.insertStatementBuilder()
++                .insert(MOCK_ID_TWO_STRING, MockMessageColumn.SENDER_ID)
++                .insert(MOCK_ID_ONE_STRING, MockMessageColumn.RECIPIENT_ID)
++                .insert("hey!", MockMessageColumn.TEXT);
+ 
+         // Act...
+-        Optional<MockMessage> result = messagesController.insert(builder);
++        Optional<MockMessage> resultOne = messagesController.insert(messageOneBuilder);
++        Optional<MockMessage> resultTwo = messagesController.insert(messageTwoBuilder);
+ 
+         // Assert...
+-        assert (result.isPresent());
++        assert (resultOne.isPresent());
++        assert (resultTwo.isPresent());
+     }
+ 
+     private void insertTwoMockUsers() {
+-- 
+2.31.1
+
