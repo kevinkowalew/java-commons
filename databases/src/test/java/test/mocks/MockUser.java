@@ -1,9 +1,15 @@
 package test.mocks;
 
+import databases.orm.Persist;
+
 public class MockUser {
+    @Persist
     private String id;
+    @Persist
     private String email;
+    @Persist
     private String salt;
+    @Persist
     private String hashedPassword;
 
     public MockUser(String id, String email, String salt, String hashedPassword) {

@@ -12,10 +12,10 @@ import platform.exceptions.InvalidEmailException;
 import platform.exceptions.InvalidPasswordException;
 import platform.exceptions.NonexistentEntityException;
 import platform.exceptions.UnexpectedNullArgumentException;
-import mocks.MockEncoder;
-import mocks.MockUserRepository;
-import mocks.MockValidator;
-import mocks.MocksFactory;
+import test.mocks.MockEncoder;
+import test.mocks.MockUserRepository;
+import test.mocks.MockValidator;
+import test.mocks.MocksFactory;
 
 public class LoginUserTests {
 	@Rule

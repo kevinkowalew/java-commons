@@ -2,9 +2,9 @@ package test.mocks;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import databases.sql.Column;
-import databases.sql.SqlTableController;
-import databases.sql.postgresql.statements.DatabaseTableSchema;
+import databases.crud.sql.Column;
+import databases.crud.sql.SqlTableController;
+import databases.crud.sql.postgresql.statements.DatabaseTableSchema;
 
 import java.util.Set;
 

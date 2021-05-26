@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import mocks.MocksFactory;
+import test.mocks.MocksFactory;
 
 public class ChatMessageBuilderTests {
 	@Test

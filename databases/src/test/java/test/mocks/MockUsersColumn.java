@@ -1,6 +1,6 @@
 package test.mocks;
 
-import databases.sql.Column;
+import databases.crud.sql.Column;
 
 public class MockUsersColumn {
     private static final String TABLE_NAME = "Users";

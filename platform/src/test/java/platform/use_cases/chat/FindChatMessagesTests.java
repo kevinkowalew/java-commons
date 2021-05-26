@@ -12,8 +12,8 @@ import org.junit.rules.ExpectedException;
 import platform.entities.ChatMessage;
 import platform.exceptions.NonexistentEntityException;
 import platform.exceptions.UnexpectedNullArgumentException;
-import mocks.MockChatMessageRepository;
-import mocks.MocksFactory;
+import test.mocks.MockChatMessageRepository;
+import test.mocks.MocksFactory;
 
 public class FindChatMessagesTests {
 	@Rule

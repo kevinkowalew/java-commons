@@ -10,6 +10,8 @@ This module contains database layer abstractions:
         - [ ] CRUD layer 
             - [x] Refactor join builder object model
             - [x] Implement where clause filters to be able to include joins
-            - [ ] Add logging for common operations
+            - [ ] Add logging everywhere...
+            - [ ] Update access control to restrict access to concrete db implementation
+            - [ ] Add mysql support
         - [ ] ORM Layer
             - [ ] Create class fields to abstract away opeartions

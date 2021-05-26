@@ -1,6 +1,6 @@
 package test.mocks;
 
-import databases.core.ResultSetDeserializer;
+import databases.crud.core.ResultSetDeserializer;
 import java.sql.ResultSet;
 import java.util.Optional;
 

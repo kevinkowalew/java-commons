@@ -3,7 +3,7 @@ package platform.entities;
 
 import org.junit.Test;
 
-import mocks.MocksFactory;
+import test.mocks.MocksFactory;
 
 import static org.junit.Assert.assertEquals;
 

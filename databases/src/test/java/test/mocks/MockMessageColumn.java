@@ -1,8 +1,8 @@
 package test.mocks;
 
-import databases.sql.Column;
+import databases.crud.sql.Column;
 
-import static databases.sql.Column.Type.VARCHAR_255;
+import static databases.crud.sql.Column.Type.VARCHAR_255;
 
 public class MockMessageColumn {
     private static final Column USERS_ID = MockUsersColumn.ID;

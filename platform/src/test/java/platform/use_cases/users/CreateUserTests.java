@@ -11,11 +11,11 @@ import platform.exceptions.ExistingUserException;
 import platform.exceptions.InvalidEmailException;
 import platform.exceptions.InvalidPasswordException;
 import platform.exceptions.UnexpectedNullArgumentException;
-import mocks.MockEncoder;
-import mocks.MockIdGenerator;
-import mocks.MockUserRepository;
-import mocks.MockValidator;
-import mocks.MocksFactory;
+import test.mocks.MockEncoder;
+import test.mocks.MockIdGenerator;
+import test.mocks.MockUserRepository;
+import test.mocks.MockValidator;
+import test.mocks.MocksFactory;
 
 public class CreateUserTests {
 	@Rule

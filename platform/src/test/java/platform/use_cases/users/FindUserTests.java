@@ -9,8 +9,8 @@ import org.junit.rules.ExpectedException;
 import platform.entities.User;
 import platform.exceptions.InvalidEmailException;
 import platform.exceptions.UnexpectedNullArgumentException;
-import mocks.MockUserRepository;
-import mocks.MocksFactory;
+import test.mocks.MockUserRepository;
+import test.mocks.MocksFactory;
 
 public class FindUserTests {
 	@Rule

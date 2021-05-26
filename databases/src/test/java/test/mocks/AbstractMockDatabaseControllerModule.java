@@ -1,19 +1,14 @@
 package test.mocks;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
 import com.google.inject.Provides;
 import commons.utils.YamlDeserializer;
-import databases.core.ResultSetDeserializer;
-import databases.sql.SqlExecutor;
-import databases.sql.SqlTableController;
-import databases.sql.postgresql.PostgresqlConnection;
-import databases.sql.postgresql.configuration.PostgresqlDeploymentConfiguration;
-import databases.sql.postgresql.configuration.adapters.PostgresqlConfigurationToPostgresqlConnection;
-import databases.sql.postgresql.executors.PostgresqlExecutor;
-import databases.sql.postgresql.statements.DatabaseTableSchema;
+import databases.crud.sql.SqlExecutor;
+import databases.crud.sql.postgresql.PostgresqlConnection;
+import databases.crud.sql.postgresql.configuration.PostgresqlDeploymentConfiguration;
+import databases.crud.sql.postgresql.configuration.adapters.PostgresqlConfigurationToPostgresqlConnection;
+import databases.crud.sql.postgresql.executors.PostgresqlExecutor;
+import databases.crud.sql.postgresql.statements.DatabaseTableSchema;
 
 public abstract class AbstractMockDatabaseControllerModule extends AbstractModule {
     public static PostgresqlDeploymentConfiguration getMockConfiguration() {

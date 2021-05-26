@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import platform.exceptions.InvalidEmailException;
-import mocks.MocksFactory;
+import test.mocks.MocksFactory;
 import platform.utilities.EmailValidator;
 
 public class EmailValidatorTests {
