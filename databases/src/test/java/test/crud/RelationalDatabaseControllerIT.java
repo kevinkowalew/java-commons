@@ -12,7 +12,7 @@ import test.mocks.*;
 import java.util.List;
 import java.util.Optional;
 
-import static databases.crud.sql.postgresql.statements.WhereClauseOperator.EQUALS;
+import static databases.crud.sql.postgresql.statements.Operator.EQUALS;
 import static org.junit.Assert.*;
 import static test.mocks.MockUsersColumn.EMAIL;
 import static test.mocks.MockUsersColumn.ID;

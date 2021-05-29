@@ -1,20 +1,28 @@
 package test.orm;
 
-import databases.orm.DatabaseModel;
-import databases.orm.Persist;
-import databases.orm.PrimaryKey;
+import databases.orm.annotations.Filterable;
+import databases.orm.annotations.Persisted;
+import databases.orm.annotations.PrimaryKey;
 
 import java.util.Objects;
 
-public class MockModel extends DatabaseModel {
+public class MockModel {
     @PrimaryKey
     public Integer id;
-    @Persist
+
+    @Filterable
+    @Persisted
     public String email;
-    @Persist
+
+    @Filterable
+    @Persisted
     public String name;
 
     public MockModel() {
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public void setEmail(String email) {
@@ -48,5 +56,13 @@ public class MockModel extends DatabaseModel {
     @Override
     public int hashCode() {
         return Objects.hash(id, email, name);
+    }
+
+    public MockModel duplicate() {
+        final MockModel duplicate = new MockModel();
+        duplicate.setId(this.getId());
+        duplicate.setName(this.getName());
+        duplicate.setEmail(this.getEmail());
+        return duplicate;
     }
 }

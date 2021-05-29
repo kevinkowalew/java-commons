@@ -1,11 +1,11 @@
 package databases.crud.sql.postgresql.statements;
 
-public enum WhereClauseOperator {
+public enum Operator {
     EQUALS,
     LESS_THAN,
     GREATER_THAN;
 
-    WhereClauseOperator() {
+    Operator() {
     }
 
     public String get() {

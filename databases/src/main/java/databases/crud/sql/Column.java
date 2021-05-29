@@ -71,7 +71,7 @@ public class Column {
         }
 
         public Column build() {
-            // TODO: add validation here
+            // TODO: add validation & logging here
             return new Column(this);
         }
     }

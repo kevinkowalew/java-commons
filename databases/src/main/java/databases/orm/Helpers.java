@@ -1,11 +1,16 @@
 package databases.orm;
 
 import databases.crud.sql.Column;
+import databases.orm.annotations.ForeignKey;
+import databases.orm.annotations.Persisted;
+import databases.orm.annotations.PrimaryKey;
+
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -46,7 +51,7 @@ public class Helpers {
     }
 
     public static boolean isPersisted(Field field) {
-        return isPrimaryKey(field) || field.isAnnotationPresent(Persist.class);
+        return isPrimaryKey(field) || field.isAnnotationPresent(Persisted.class);
     }
 
     static boolean isPrimaryKey(Field field) {

@@ -6,7 +6,7 @@ import databases.crud.sql.SqlStatementBuilderException;
 import databases.crud.sql.postgresql.statements.DatabaseTableSchema;
 import databases.crud.sql.postgresql.statements.Formatter;
 import databases.crud.sql.postgresql.statements.WhereClause;
-import databases.crud.sql.postgresql.statements.WhereClauseOperator;
+import databases.crud.sql.postgresql.statements.Operator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class SelectStatement {
             return this;
         }
 
-        public Builder where(Column column, WhereClauseOperator operator, Object value) {
+        public Builder where(Column column, Operator operator, Object value) {
             final WhereClause clause = new WhereClause(column, operator, value);
             return where(clause);
         }
@@ -50,7 +50,7 @@ public class SelectStatement {
             return this;
         }
 
-        public Builder or(Column column, WhereClauseOperator operator, Object value) {
+        public Builder or(Column column, Operator operator, Object value) {
             final WhereClause clause = new WhereClause(column, operator, value);
             return or(clause);
         }
@@ -60,7 +60,7 @@ public class SelectStatement {
             return this;
         }
 
-        public Builder and(Column column, WhereClauseOperator operator, Object value) {
+        public Builder and(Column column, Operator operator, Object value) {
             final WhereClause clause = new WhereClause(column, operator, value);
             return where(clause);
         }

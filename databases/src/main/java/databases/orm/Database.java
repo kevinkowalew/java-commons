@@ -3,15 +3,24 @@ package databases.orm;
 import databases.crud.sql.Column;
 import databases.crud.sql.SqlTableController;
 import databases.crud.sql.postgresql.statements.DatabaseTableSchema;
+import databases.crud.sql.postgresql.statements.WhereClause;
 import databases.crud.sql.postgresql.statements.builders.DeleteStatement;
 import databases.crud.sql.postgresql.statements.builders.InsertStatement;
 import databases.crud.sql.postgresql.statements.builders.SelectStatement;
 import databases.crud.sql.postgresql.statements.builders.UpdateStatement;
 
+import java.io.Serializable;
+import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class Database<T> implements CrudOperable<T> {
     private final Class<T> tClass;
@@ -36,11 +45,17 @@ public class Database<T> implements CrudOperable<T> {
     @Override
     public Optional<List<T>> read(Filter... filters) {
         final SelectStatement.Builder builder = SelectStatement.newBuilder(getSchema());
+
+        for (Filter filter : filters) {
+            Optional<WhereClause> whereClause = createWhereClauseForFilter(filter);
+            whereClause.ifPresent(builder::where);
+        }
+
         return controller.read(builder);
     }
 
     @Override
-    public boolean update(T t) {
+    public boolean update(T t, Filter... filters) {
         final UpdateStatement.Builder builder = UpdateStatement.newBuilder(getSchema());
 
         getAllPersistedFields().forEach(field -> {
@@ -57,7 +72,7 @@ public class Database<T> implements CrudOperable<T> {
     }
 
     @Override
-    public boolean delete(T t) {
+    public boolean delete(T t, Filter... filters) {
         final DeleteStatement.Builder builder = DeleteStatement.newBuilder(getSchema());
         // TODO: implement me
         return controller.delete(builder);
@@ -75,16 +90,16 @@ public class Database<T> implements CrudOperable<T> {
         getAllPersistedFields().stream()
                 .filter(Predicate.not(Helpers::isPrimaryKey))
                 .forEach(field -> {
-            field.setAccessible(true);
-            final Optional<String> valueToInsert = Helpers.extractValueFromField(field, t);
+                    field.setAccessible(true);
+                    final Optional<String> valueToInsert = Helpers.extractValueFromField(field, t);
 
-            if (valueToInsert.isEmpty()) {
-                return;
-            }
+                    if (valueToInsert.isEmpty()) {
+                        return;
+                    }
 
-            final Column column = Helpers.createColumnForField(field, tClass);
-            builder.insert(valueToInsert.get(), column);
-        });
+                    final Column column = Helpers.createColumnForField(field, tClass);
+                    builder.insert(valueToInsert.get(), column);
+                });
 
         return builder;
     }
@@ -101,5 +116,35 @@ public class Database<T> implements CrudOperable<T> {
     private SqlTableController<T> createController() {
         final GenericDatabaseControllerModule<T> module = new GenericDatabaseControllerModule<>(this.tClass);
         return module.create();
+    }
+
+    private <FieldType> Optional<WhereClause> createWhereClauseForFilter(Filter<T, FieldType> filter) {
+        if (filter.getFieldName() == null ||
+                filter.getOperator() == null ||
+                filter.getExpected() == null ||
+                filter.getFieldClassType() == null) {
+            return Optional.empty();
+        } else {
+            final Column column = getColumnForFilter(filter);
+            final WhereClause clause = new WhereClause(column, filter.getOperator(), filter.getExpected());
+            return Optional.of(clause);
+        }
+    }
+
+    private Column getColumnForFilter(Filter filter) {
+        // TODO: add validation & logging here
+        return Column.newBuilder()
+                .parentTableName(getClass().getName())
+                .type(getColumnTypeForFilter(filter))
+                .named(filter.getFieldName())
+                .build();
+    }
+
+    private Column.Type getColumnTypeForFilter(Filter filter) {
+        return Column.Type.VARCHAR_255;
+    }
+
+    public Filter.Builder newFilterBuilder() {
+        return Filter.newBuilder(tClass);
     }
 }

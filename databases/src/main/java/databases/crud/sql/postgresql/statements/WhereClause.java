@@ -4,10 +4,10 @@ import databases.crud.sql.Column;
 
 public class WhereClause {
     private final Column column;
-    private final WhereClauseOperator operator;
+    private final Operator operator;
     private final Object value;
 
-    public WhereClause(Column column, WhereClauseOperator operator, Object value) {
+    public WhereClause(Column column, Operator operator, Object value) {
         this.column = column;
         this.operator = operator;
         this.value = value;
@@ -17,7 +17,7 @@ public class WhereClause {
         return this.column;
     }
 
-    public WhereClauseOperator getOperator() {
+    public Operator getOperator() {
         return this.operator;
     }
 
