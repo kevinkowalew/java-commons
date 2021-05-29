@@ -9,26 +9,23 @@ import databases.crud.sql.postgresql.statements.builders.InsertStatement;
 import databases.crud.sql.postgresql.statements.builders.SelectStatement;
 import databases.crud.sql.postgresql.statements.builders.UpdateStatement;
 
-import java.io.Serializable;
-import java.lang.invoke.SerializedLambda;
+import javax.xml.crypto.Data;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class Database<T> implements CrudOperable<T> {
     private final Class<T> tClass;
     private final SqlTableController<T> controller;
+    private final List<Database<?>> nestedFieldDatabases;
 
     private Database(Class<T> tClass) {
         this.tClass = tClass;
         this.controller = createController();
+        this.nestedFieldDatabases = createNestedObjectDatabases();
     }
 
     public static <T> Database<T> storing(Class<T> model) {
@@ -39,6 +36,7 @@ public class Database<T> implements CrudOperable<T> {
     public Optional<T> insert(T t) {
         createTableIfNeeded();
         final InsertStatement.Builder builder = createInsertStatementBuilder(t);
+
         return controller.insert(builder);
     }
 
@@ -146,5 +144,12 @@ public class Database<T> implements CrudOperable<T> {
 
     public Filter.Builder newFilterBuilder() {
         return Filter.newBuilder(tClass);
+    }
+
+    private List<Database<?>> createNestedObjectDatabases() {
+        return Helpers.getNestedPersistedObjectsForClass(tClass).stream()
+                .map(Object::getClass)
+                .map(Database::storing)
+                .collect(Collectors.toList());
     }
 }

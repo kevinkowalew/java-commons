@@ -1,6 +1,5 @@
 package test.orm;
 
-import databases.orm.annotations.Filterable;
 import databases.orm.annotations.Persisted;
 import databases.orm.annotations.PrimaryKey;
 
@@ -10,11 +9,9 @@ public class MockModel {
     @PrimaryKey
     public Integer id;
 
-    @Filterable
     @Persisted
     public String email;
 
-    @Filterable
     @Persisted
     public String name;
 

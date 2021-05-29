@@ -1,7 +1,7 @@
 package databases.orm;
 
+import com.google.inject.internal.util.Objects;
 import databases.crud.sql.Column;
-import databases.orm.annotations.ForeignKey;
 import databases.orm.annotations.Persisted;
 import databases.orm.annotations.PrimaryKey;
 
@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -26,7 +25,9 @@ public class Helpers {
     private static Column.Type getTypeForField(Field field) {
         if (field.isAnnotationPresent(PrimaryKey.class)) {
             return Column.Type.SERIAL_PRIMARY_KEY;
-        } else if (field.isAnnotationPresent(ForeignKey.class)) {
+        }
+        Class<?> fieldClass = field.getType();
+        if (field.isAnnotationPresent(Persisted.class) && fieldClass.equals(Object.class)) {
             return Column.Type.FOREIGN_KEY;
         } else {
             return Column.Type.VARCHAR_255;
@@ -47,6 +48,12 @@ public class Helpers {
     public static List<Field> getAllPersistedFieldsForClass(Class<?> tClass) {
         return Arrays.stream(tClass.getDeclaredFields())
                 .filter(Helpers::isPersisted)
+                .collect(Collectors.toList());
+    }
+
+    public static List<Field> getNestedPersistedObjectsForClass(Class<?> tClass) {
+        return getAllPersistedFieldsForClass(tClass).stream()
+                .filter(field -> field.getType().equals(Object.class))
                 .collect(Collectors.toList());
     }
 
