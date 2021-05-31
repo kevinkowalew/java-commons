@@ -51,4 +51,12 @@ public abstract class ResultSetDeserializer<T> implements Deserializer {
             return defaultValue;
         }
     }
+
+    public String extractFromResultSet(ResultSet resultSet, Column column, String defaultValue) {
+        try {
+            return resultSet.getString(column.getName());
+        } catch (SQLException throwables) {
+            return defaultValue;
+        }
+    }
 }

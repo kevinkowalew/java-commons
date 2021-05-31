@@ -1,6 +1,5 @@
 package databases.orm;
 
-import com.google.inject.internal.util.Objects;
 import databases.crud.sql.Column;
 import databases.orm.annotations.Persisted;
 import databases.orm.annotations.PrimaryKey;
@@ -14,24 +13,23 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Helpers {
-    static Column createColumnForField(Field field, Class<?> tClass) {
-        return Column.newBuilder()
-                .parentTableName(tClass.getName())
-                .named(field.getName())
-                .type(getTypeForField(field))
-                .build();
-    }
 
     private static Column.Type getTypeForField(Field field) {
         if (field.isAnnotationPresent(PrimaryKey.class)) {
             return Column.Type.SERIAL_PRIMARY_KEY;
-        }
-        Class<?> fieldClass = field.getType();
-        if (field.isAnnotationPresent(Persisted.class) && fieldClass.equals(Object.class)) {
+        } else if (isNestedObjectPersistedField(field)) {
             return Column.Type.FOREIGN_KEY;
         } else {
             return Column.Type.VARCHAR_255;
         }
+    }
+
+    private static String getNameForField(Field field) {
+        return isNestedObjectPersistedField(field) ? field.getName() + "_id" : field.getName();
+    }
+
+    private static boolean isNestedObjectPersistedField(Field field) {
+        return field.isAnnotationPresent(Persisted.class) && field.equals(Object.class);
     }
 
     static <T> Optional<String> extractValueFromField(Field field, T t) {
@@ -45,14 +43,15 @@ public class Helpers {
         }
     }
 
-    public static List<Field> getAllPersistedFieldsForClass(Class<?> tClass) {
+    public static Set<Field> getPersistedPrimitiveFields(Class<?> tClass) {
         return Arrays.stream(tClass.getDeclaredFields())
                 .filter(Helpers::isPersisted)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
-    public static List<Field> getNestedPersistedObjectsForClass(Class<?> tClass) {
-        return getAllPersistedFieldsForClass(tClass).stream()
+    public static List<Field> getPersistedObjectFields(Class<?> tClass) {
+        return Arrays.stream(tClass.getDeclaredFields())
+                .filter(Helpers::isPersisted)
                 .filter(field -> field.getType().equals(Object.class))
                 .collect(Collectors.toList());
     }
@@ -73,7 +72,7 @@ public class Helpers {
     }
 
     static Set<Column> createPersistedFieldColumns(Class<?> tClass) {
-        return Helpers.getAllPersistedFieldsForClass(tClass).stream()
+        return Helpers.getPersistedPrimitiveFields(tClass).stream()
                 .map(field -> Helpers.createColumnForField(field, tClass))
                 .collect(Collectors.toSet());
     }
@@ -83,5 +82,13 @@ public class Helpers {
                 .filter(Helpers::isPrimaryKey)
                 .map(field -> createColumnForField(field, tClass))
                 .collect(Collectors.toSet());
+    }
+
+    static Column createColumnForField(Field field, Class<?> tClass) {
+        return Column.newBuilder()
+                .parentTableName(tClass.getName())
+                .named(getNameForField(field))
+                .type(getTypeForField(field))
+                .build();
     }
 }

@@ -18,7 +18,7 @@ public class GenericResultSetDeserializer<T> extends ResultSetDeserializer<T> {
 
     @Override
     public Optional<T> deserializeResultSet(ResultSet resultSet) {
-        final List<Field> persistedFields = Helpers.getAllPersistedFieldsForClass(tClass);
+        final List<Field> persistedFields = Helpers.getPersistedObjectFields(tClass);
         return deserializeFieldsFromResultSet(persistedFields, resultSet);
     }
 

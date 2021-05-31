@@ -9,11 +9,10 @@ import databases.crud.sql.postgresql.statements.builders.InsertStatement;
 import databases.crud.sql.postgresql.statements.builders.SelectStatement;
 import databases.crud.sql.postgresql.statements.builders.UpdateStatement;
 
-import javax.xml.crypto.Data;
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -34,9 +33,8 @@ public class Database<T> implements CrudOperable<T> {
 
     @Override
     public Optional<T> insert(T t) {
-        createTableIfNeeded();
+        createTablesIfNeeded();
         final InsertStatement.Builder builder = createInsertStatementBuilder(t);
-
         return controller.insert(builder);
     }
 
@@ -56,17 +54,21 @@ public class Database<T> implements CrudOperable<T> {
     public boolean update(T t, Filter... filters) {
         final UpdateStatement.Builder builder = UpdateStatement.newBuilder(getSchema());
 
-        getAllPersistedFields().forEach(field -> {
-            final String fieldName = field.getName();
-            final Column column = Helpers.createColumnForField(field, tClass);
-            builder.update(fieldName, column);
-        });
 
         return controller.update(builder);
     }
 
-    private List<Field> getAllPersistedFields() {
-        return Helpers.getAllPersistedFieldsForClass(tClass);
+    private Set<Column> getColumnsForPersistedFields() {
+        return Helpers.getColumnsForObject(tClass);
+    }
+
+    private Set<Field> getPersistedPrimitiveFields() {
+        List<Field> nestedFieldPrimaryKeys = generateFieldsForNestedObjectPrimaryKeys();
+        return Helpers.getPersistedPrimitiveFields(tClass);
+    }
+
+    private List<Field> generateFieldsForNestedObjectPrimaryKeys() {
+        return Helpers.getPersistedObjectFields(tClass);
     }
 
     @Override
@@ -76,16 +78,19 @@ public class Database<T> implements CrudOperable<T> {
         return controller.delete(builder);
     }
 
-    private void createTableIfNeeded() {
+    private void createTablesIfNeeded() {
         if (!controller.tableExists()) {
             controller.createTable();
         }
+
+        nestedFieldDatabases.stream()
+                .map
     }
 
     private InsertStatement.Builder createInsertStatementBuilder(T t) {
         final InsertStatement.Builder builder = controller.insertStatementBuilder();
 
-        getAllPersistedFields().stream()
+        getPersistedPrimitiveFields().stream()
                 .filter(Predicate.not(Helpers::isPrimaryKey))
                 .forEach(field -> {
                     field.setAccessible(true);
@@ -147,7 +152,7 @@ public class Database<T> implements CrudOperable<T> {
     }
 
     private List<Database<?>> createNestedObjectDatabases() {
-        return Helpers.getNestedPersistedObjectsForClass(tClass).stream()
+        return Helpers.getPersistedObjectFields(tClass).stream()
                 .map(Object::getClass)
                 .map(Database::storing)
                 .collect(Collectors.toList());

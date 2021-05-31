@@ -21,7 +21,7 @@ public class MockMessageDeserializer extends ResultSetDeserializer<MockMessage> 
         final String recipientEmail = extractValueFrom(resultSet, "recipient_email").orElse("");
         final MockUser recipient = new MockUser(recipientId, recipientEmail, null, null);
 
-        final String text = extractFromResultSet(resultSet, TEXT).orElse("");
+        final String text = extractFromResultSet(resultSet, TEXT, "");
         return Optional.of( new MockMessage(id, text, sender, recipient) );
     }
 
